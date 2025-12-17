@@ -61,6 +61,12 @@
 
 <script>
 (function(){
+  alert(
+  "user=" + (Telegram.WebApp.initDataUnsafe.user
+    ? Telegram.WebApp.initDataUnsafe.user.first_name
+    : "NO")
+);
+  
   alert("href:\n" + location.href);
 })();
 </script>
