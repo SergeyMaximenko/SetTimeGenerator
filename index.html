@@ -210,6 +210,8 @@ button:disabled {
           user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
           username: tg?.initDataUnsafe?.user?.username || "",
           platform: tg?.platform || "",
+          chat_id: tg?.initDataUnsafe?.chat?.id ? String(tg.initDataUnsafe.chat.id) : "",
+          message_id: tg?.initDataUnsafe?.message_id ? String(tg.initDataUnsafe.message_id) : "",
           datetime: `${date} ${time}`
         });
 
