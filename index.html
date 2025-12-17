@@ -55,20 +55,32 @@
   <input type="datetime-local" id="dt">
 </div>
 
-<button onclick="send()">Сохранить13</button>
+<button onclick="send()">Сохранить14</button>
 
 
 
 <script>
-(function(){
-  alert(
-  "user1=" + (Telegram.WebApp.initDataUnsafe.user
-    ? Telegram.WebApp.initDataUnsafe.user.first_name
-    : "NO")
-);
-  
-  alert("href:\n" + location.href);
-})();
+async function send() {
+  const tg = window.Telegram.WebApp;
+
+  const payload = {
+    user_id: tg.initDataUnsafe?.user?.id || null,
+    username: tg.initDataUnsafe?.user?.username || null,
+    platform: tg.platform,
+    payload: "test from mini app"
+  };
+
+  const res = await fetch("https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const json = await res.json();
+  console.log(json);
+}
 </script>
 
 </body>
