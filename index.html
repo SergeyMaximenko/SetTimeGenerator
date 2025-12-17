@@ -7,81 +7,103 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <style>
-    body { margin:0; padding:16px; font-family:-apple-system, Segoe UI, Roboto, Arial; }
-    .box { max-width:420px; margin:0 auto; }
+<style>
+  body { margin:0; padding:16px; font-family:-apple-system, Segoe UI, Roboto, Arial; }
+  .box { max-width:420px; margin:0 auto; }
 
-    .label {
-      text-align:center;
-      font-size:24px;
-      font-weight:600;
-      margin: 10px 0 18px;
-    }
+  .label {
+    text-align:center;
+    font-size:24px;
+    font-weight:600;
+    margin: 10px 0 18px;
+  }
 
-    .field-label{
-      font-size:18px;
-      font-weight:600;
-      margin-top:14px;
-      margin-bottom:6px;
-    }
+  .field-label{
+    font-size:18px;
+    font-weight:600;
+    margin-top:14px;
+    margin-bottom:6px;
+  }
 
-    input[type="date"],
-    input[type="time"]{
-      width:100%;
-      height:56px;
-      font-size:28px;
-      border-radius:14px;
-      border:2px solid #2aabee;
-      padding:0 12px;
-      box-sizing:border-box;
-      background:#fff;
-    }
+  /* ===== INPUT WRAPPER (FIX iOS WIDTH) ===== */
+  .input-wrap{
+    width:100%;
+    max-width:100%;
+    box-sizing:border-box;
+    overflow:hidden;           /* ключове для iOS */
+  }
 
-    button{
-      width:100%;
-      height:56px;
-      margin-top:18px;
-      font-size:28px;
-      border:0;
-      border-radius:14px;
-      background:#2aabee;
-      color:#fff;
-      font-weight:700;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-      cursor:pointer;
-    }
+  .input-wrap input{
+    width:100%;
+    height:56px;
+    font-size:28px;
+    border-radius:14px;
+    border:2px solid #2aabee;
+    padding:0 12px;
+    box-sizing:border-box;
+    background:#fff;
 
-    button:disabled{
-      opacity:.6;
-      cursor:not-allowed;
-    }
+    -webkit-appearance:none;
+    appearance:none;
+  }
 
-    .hint{
-      margin-top:12px;
-      font-size:14px;
-      opacity:.85;
-      text-align:center;
-      min-height:20px;
-    }
+  /* Прибираємо iOS native іконки (календар / час) */
+  input[type="date"]::-webkit-calendar-picker-indicator,
+  input[type="time"]::-webkit-calendar-picker-indicator{
+    opacity:0;
+    display:none;
+    -webkit-appearance:none;
+  }
 
-    /* Простий спіннер */
-    .spinner{
-      width:22px;
-      height:22px;
-      border-radius:50%;
-      border:3px solid rgba(255,255,255,.45);
-      border-top-color:#fff;
-      animation:spin 0.8s linear infinite;
-      display:none;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+  /* ===== BUTTON ===== */
+  button{
+    width:100%;
+    max-width:100%;
+    height:56px;
+    margin-top:18px;
+    font-size:28px;
+    border:0;
+    border-radius:14px;
+    background:#2aabee;
+    color:#fff;
+    font-weight:700;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    cursor:pointer;
+    box-sizing:border-box;
+  }
 
-    /* Коли йде збереження */
-    .saving .spinner{ display:inline-block; }
-  </style>
+  button:disabled{
+    opacity:.6;
+    cursor:not-allowed;
+  }
+
+  .hint{
+    margin-top:12px;
+    font-size:14px;
+    opacity:.85;
+    text-align:center;
+    min-height:20px;
+  }
+
+  /* ===== SPINNER ===== */
+  .spinner{
+    width:22px;
+    height:22px;
+    border-radius:50%;
+    border:3px solid rgba(255,255,255,.45);
+    border-top-color:#fff;
+    animation:spin 0.8s linear infinite;
+    display:none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Коли йде збереження */
+  .saving .spinner{ display:inline-block; }
+</style>
+
 </head>
 
 <body>
