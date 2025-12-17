@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Заправка генератора</title>
+
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+<style>
+  body { margin:0; padding:16px; font-family: -apple-system, Segoe UI, Roboto, Arial; }
+  .box { max-width: 420px; margin: 0 auto; }
+
+
+  input[type="datetime-local"]{
+    width: 100%;
+    height: 56px;
+    margin-top:12px;
+    font-size: 40px;
+    border:0;
+    border-radius:14px;
+    border: 2px solid #2aabee;
+   
+  }
+
+  button{
+    width:100%;
+    height:56px;
+    margin-top:12px;
+    font-size:40px;
+    border:0;
+    border-radius:14px;
+    background:#2aabee;
+    color:#fff;
+  }
+.label {
+  text-align: center;
+  font-size: 24px;     /* можна 22–26 */
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+  
+</style>
+</head>
+
+<body>
+
+<div class="label">
+  Вкажіть дату та час заправки генератора
+</div>
+
+<div class="input-wrapper">
+  <input type="datetime-local" id="dt">
+</div>
+
+<button onclick="send()">Сохранить</button>
+
+
+
+<script>
+(function(){
+  alert("href:\n" + location.href);
+})();
+</script>
+
+</body>
+</html>
