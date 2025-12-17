@@ -63,19 +63,19 @@
 async function send() {
   const tg = window.Telegram.WebApp;
 
-  const payload = {
-    user_id: tg.initDataUnsafe?.user?.id || null,
-    username: tg.initDataUnsafe?.user?.username || null,
-    platform: tg.platform,
+  const params = new URLSearchParams({
+    user_id: tg.initDataUnsafe?.user?.id || "",
+    username: tg.initDataUnsafe?.user?.username || "",
+    platform: tg.platform || "",
     payload: "test from mini app"
-  };
+  });
 
-  const res = await fetch("https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec", {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
+  const url =
+    "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec"
+    + "?" + params.toString();
+
+  const res = await fetch(url, {
+    method: "GET"
   });
 
   const json = await res.json();
