@@ -1,87 +1,156 @@
 <!doctype html>
-<html>
+<html lang="uk">
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   <title>Заправка генератора</title>
 
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1, viewport-fit=cover">
-
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<style>
-  body { margin:0; padding:16px; font-family: -apple-system, Segoe UI, Roboto, Arial; }
-  .box { max-width: 420px; margin: 0 auto; }
+  <style>
+    body { margin:0; padding:16px; font-family:-apple-system, Segoe UI, Roboto, Arial; }
+    .box { max-width:420px; margin:0 auto; }
 
+    .label {
+      text-align:center;
+      font-size:24px;
+      font-weight:600;
+      margin: 10px 0 18px;
+    }
 
-  input[type="datetime-local"]{
-    width: 100%;
-    height: 56px;
-    margin-top:12px;
-    font-size: 40px;
-    border:0;
-    border-radius:14px;
-    border: 2px solid #2aabee;
-   
-  }
+    .field-label{
+      font-size:18px;
+      font-weight:600;
+      margin-top:14px;
+      margin-bottom:6px;
+    }
 
-  button{
-    width:100%;
-    height:56px;
-    margin-top:12px;
-    font-size:40px;
-    border:0;
-    border-radius:14px;
-    background:#2aabee;
-    color:#fff;
-  }
-.label {
-  text-align: center;
-  font-size: 24px;     /* можна 22–26 */
-  font-weight: 600;
-  margin-bottom: 16px;
-}
-  
-</style>
+    input[type="date"],
+    input[type="time"]{
+      width:100%;
+      height:56px;
+      font-size:28px;
+      border-radius:14px;
+      border:2px solid #2aabee;
+      padding:0 12px;
+      box-sizing:border-box;
+      background:#fff;
+    }
+
+    button{
+      width:100%;
+      height:56px;
+      margin-top:18px;
+      font-size:28px;
+      border:0;
+      border-radius:14px;
+      background:#2aabee;
+      color:#fff;
+      font-weight:700;
+    }
+
+    .hint{
+      margin-top:10px;
+      font-size:14px;
+      opacity:.7;
+      text-align:center;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="box">
+    <div class="label">Вкажіть дату та час заправки генератора</div>
 
-<div class="label">
-  Вкажіть дату та час заправки генератора1
-</div>
+    <div class="field-label">Дата</div>
+    <input type="date" id="date" />
 
-<div class="input-wrapper">
-  <input type="datetime-local" id="dt">
-</div>
+    <div class="field-label">Час</div>
+    <input type="time" id="time" step="60" />
 
-<button onclick="send()">Сохранить15</button>
+    <button onclick="send()">Зберегти</button>
 
+    <div class="hint" id="status"></div>
+  </div>
 
+  <script>
+    // ✅ ВСТАВ СЮДИ СВІЙ URL Apps Script (без зайвих параметрів типу ?вы=2)
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec";
 
-<script>
-async function send() {
-  const tg = window.Telegram.WebApp;
+    function setStatus(text) {
+      document.getElementById("status").textContent = text || "";
+    }
 
-  const params = new URLSearchParams({
-    user_id: tg.initDataUnsafe?.user?.id || "",
-    username: tg.initDataUnsafe?.user?.username || "",
-    platform: tg.platform || "",
-    payload: "test from mini app"
-  });
+    // Отримати поточну дату/час по Києву (Europe/Kyiv) і підставити в інпути
+    function setNowKyivDefaults() {
+      const tz = "Europe/Kyiv";
+      const d = new Date();
 
-  const url =
-    "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec"
-    + "?" + params.toString();
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: tz,
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(d);
 
-  const res = await fetch(url, {
-    method: "GET"
-  });
+      const map = {};
+      for (const p of parts) if (p.type !== "literal") map[p.type] = p.value;
 
-  const json = await res.json();
-  console.log(json);
-}
-</script>
+      // en-CA дає YYYY-MM-DD
+      const yyyy = map.year;
+      const mm = map.month;
+      const dd = map.day;
+      const hh = map.hour;
+      const mi = map.minute;
 
+      document.getElementById("date").value = `${yyyy}-${mm}-${dd}`;
+      document.getElementById("time").value = `${hh}:${mi}`;
+    }
+
+    // Викликаємо при завантаженні
+    setNowKyivDefaults();
+
+    async function send() {
+      try {
+        setStatus("");
+
+        const tg = window.Telegram?.WebApp || null;
+
+        const date = document.getElementById("date").value;
+        const time = document.getElementById("time").value;
+
+        if (!date) { alert("Вкажіть дату"); return; }
+        if (!time) { alert("Вкажіть час"); return; }
+
+        const params = new URLSearchParams({
+          action: "save",                         // якщо в GAS зробиш роутинг
+          user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+          username: tg?.initDataUnsafe?.user?.username || "",
+          platform: tg?.platform || "",
+          datetime: `${date} ${time}`             // те, що пишемо в таблицю
+        });
+
+        const url = GAS_URL + "?" + params.toString();
+
+        const res = await fetch(url, { method: "GET" });
+        const json = await res.json();
+
+        if (!json.ok) {
+          setStatus("Помилка: " + (json.error || "unknown"));
+          alert("Помилка збереження: " + (json.error || "unknown"));
+          return;
+        }
+
+        setStatus("✅ Збережено");
+        if (tg) tg.HapticFeedback?.notificationOccurred?.("success");
+      } catch (err) {
+        setStatus("Помилка: " + err.message);
+        alert("Помилка: " + err.message);
+      }
+    }
+  </script>
 </body>
 </html>
