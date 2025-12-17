@@ -47,14 +47,40 @@
       background:#2aabee;
       color:#fff;
       font-weight:700;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      cursor:pointer;
+    }
+
+    button:disabled{
+      opacity:.6;
+      cursor:not-allowed;
     }
 
     .hint{
-      margin-top:10px;
+      margin-top:12px;
       font-size:14px;
-      opacity:.7;
+      opacity:.85;
       text-align:center;
+      min-height:20px;
     }
+
+    /* Простий спіннер */
+    .spinner{
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      border:3px solid rgba(255,255,255,.45);
+      border-top-color:#fff;
+      animation:spin 0.8s linear infinite;
+      display:none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Коли йде збереження */
+    .saving .spinner{ display:inline-block; }
   </style>
 </head>
 
@@ -68,7 +94,10 @@
     <div class="field-label">Час</div>
     <input type="time" id="time" step="60" />
 
-    <button onclick="send()">Зберегти</button>
+    <button id="btnSave" onclick="send()">
+      <span class="spinner" aria-hidden="true"></span>
+      <span id="btnText">Зберегти</span>
+    </button>
 
     <div class="hint" id="status"></div>
   </div>
@@ -77,11 +106,55 @@
     // ✅ ВСТАВ СЮДИ СВІЙ URL Apps Script (без зайвих параметрів типу ?вы=2)
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec";
 
-    function setStatus(text) {
-      document.getElementById("status").textContent = text || "";
+    const elDate = document.getElementById("date");
+    const elTime = document.getElementById("time");
+    const btn = document.getElementById("btnSave");
+    const btnText = document.getElementById("btnText");
+    const statusEl = document.getElementById("status");
+
+    function setStatus(text) { statusEl.textContent = text || ""; }
+
+    function setUiState(state) {
+      // state: "idle" | "saving" | "saved" | "error"
+      if (state === "saving") {
+        elDate.disabled = true;
+        elTime.disabled = true;
+        btn.disabled = true;              // щоб не натискали повторно
+        btn.classList.add("saving");
+        btnText.textContent = "Збереження…";
+        setStatus("Йде збереження…");
+        return;
+      }
+
+      if (state === "saved") {
+        elDate.disabled = true;
+        elTime.disabled = true;
+        btn.disabled = true;              // після успіху лишаємо disabled
+        btn.classList.remove("saving");
+        btnText.textContent = "Збережено";
+        setStatus("✅ Збережено");
+        return;
+      }
+
+      if (state === "error") {
+        elDate.disabled = false;
+        elTime.disabled = false;
+        btn.disabled = false;             // при помилці даємо спробувати ще раз
+        btn.classList.remove("saving");
+        btnText.textContent = "Зберегти";
+        return;
+      }
+
+      // idle
+      elDate.disabled = false;
+      elTime.disabled = false;
+      btn.disabled = false;
+      btn.classList.remove("saving");
+      btnText.textContent = "Зберегти";
+      setStatus("");
     }
 
-    // Отримати поточну дату/час по Києву (Europe/Kyiv) і підставити в інпути
+    // Поточна дата/час по Києву
     function setNowKyivDefaults() {
       const tz = "Europe/Kyiv";
       const d = new Date();
@@ -99,56 +172,56 @@
       const map = {};
       for (const p of parts) if (p.type !== "literal") map[p.type] = p.value;
 
-      // en-CA дає YYYY-MM-DD
-      const yyyy = map.year;
-      const mm = map.month;
-      const dd = map.day;
-      const hh = map.hour;
-      const mi = map.minute;
-
-      document.getElementById("date").value = `${yyyy}-${mm}-${dd}`;
-      document.getElementById("time").value = `${hh}:${mi}`;
+      elDate.value = `${map.year}-${map.month}-${map.day}`;
+      elTime.value = `${map.hour}:${map.minute}`;
     }
 
-    // Викликаємо при завантаженні
     setNowKyivDefaults();
 
     async function send() {
+      const tg = window.Telegram?.WebApp || null;
+
+      const date = elDate.value;
+      const time = elTime.value;
+
+      if (!date) { alert("Вкажіть дату"); return; }
+      if (!time) { alert("Вкажіть час"); return; }
+
       try {
-        setStatus("");
-
-        const tg = window.Telegram?.WebApp || null;
-
-        const date = document.getElementById("date").value;
-        const time = document.getElementById("time").value;
-
-        if (!date) { alert("Вкажіть дату"); return; }
-        if (!time) { alert("Вкажіть час"); return; }
+        setUiState("saving");
 
         const params = new URLSearchParams({
-          action: "save",                         // якщо в GAS зробиш роутинг
+          action: "save",
           user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
           username: tg?.initDataUnsafe?.user?.username || "",
           platform: tg?.platform || "",
-          datetime: `${date} ${time}`             // те, що пишемо в таблицю
+          datetime: `${date} ${time}`
         });
 
         const url = GAS_URL + "?" + params.toString();
 
         const res = await fetch(url, { method: "GET" });
-        const json = await res.json();
+
+        // якщо GAS повернув не JSON (інколи буває при помилці деплою)
+        const text = await res.text();
+        let json;
+        try { json = JSON.parse(text); } catch { json = { ok:false, error:text }; }
 
         if (!json.ok) {
-          setStatus("Помилка: " + (json.error || "unknown"));
-          alert("Помилка збереження: " + (json.error || "unknown"));
+          setStatus("❌ Помилка: " + (json.error || "unknown"));
+          setUiState("error");
+          if (tg) tg.HapticFeedback?.notificationOccurred?.("error");
           return;
         }
 
-        setStatus("✅ Збережено");
+        setUiState("saved");
         if (tg) tg.HapticFeedback?.notificationOccurred?.("success");
+
       } catch (err) {
-        setStatus("Помилка: " + err.message);
-        alert("Помилка: " + err.message);
+        setStatus("❌ Помилка: " + err.message);
+        setUiState("error");
+        const tg = window.Telegram?.WebApp || null;
+        if (tg) tg.HapticFeedback?.notificationOccurred?.("error");
       }
     }
   </script>
