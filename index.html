@@ -249,7 +249,8 @@ button:disabled {
         const params = new URLSearchParams({
           action: "checkAccess",
           user_id:   tg?.initDataUnsafe?.user?.id       ? String(tg.initDataUnsafe.user.id)       : "",
-          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : ""
+          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+          user_name: tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : ""
         });
 
         const url = GAS_URL + "?" + params.toString();
