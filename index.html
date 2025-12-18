@@ -138,6 +138,28 @@ button:disabled {
     const statusEl = document.getElementById("status");
 
 
+    const tg = window.Telegram?.WebApp || null;
+    const params = new URLSearchParams({
+          action: "checkAccess",
+          user_id:   tg?.initDataUnsafe?.user?.id         ? String(tg.initDataUnsafe.user.id)         : "",
+          user_code: tg?.initDataUnsafe?.user?.username   ? String(tg.initDataUnsafe.user.username)   : ""
+        });
+
+  const url = GAS_URL + "?" + params.toString();
+
+  const res = await fetch(url, { method: "GET" });
+
+  // якщо GAS повернув не JSON (інколи буває при помилці деплою)
+  const text = await res.text();
+  let json;
+  try { json = JSON.parse(text); } catch { json = { ok:false, error:text }; }
+
+  if (!json.ok) {
+    setStatus("❌ " + (json.error || "unknown"));
+    btn.disabled = true; 
+  }
+    
+    
     
     function setStatus(text) { statusEl.textContent = text || ""; }
 
