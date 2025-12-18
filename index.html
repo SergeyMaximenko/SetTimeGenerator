@@ -238,11 +238,22 @@ button:disabled {
       if (!date) { alert("Вкажіть дату"); return; }
       if (!time) { alert("Вкажіть час"); return; }
 
-
-      if (!confirm(`Зберегти?\n\n📅 ${elDate.value}\n⏰ ${elTime.value}\n⛽ ${elLiters.value} л`))
+      if (!liters) 
       {
-        return;
+        if (!confirm(`Підтверджуєте заправку \n⛽ ${elLiters.value} літрів?`))
+        {
+          return;
+        }  
       }
+      else
+      {
+        if (!confirm(`Зберегти дані без вказаного об'єму заправки?`))
+        {
+          return;
+        }  
+      }
+      
+      
         
       if (!liters) { alert("Вкажіть обʼєм (літри)"); return; }
 
