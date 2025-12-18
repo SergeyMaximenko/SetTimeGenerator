@@ -136,8 +136,40 @@ button:disabled {
     const btnText = document.getElementById("btnText");
     const statusEl = document.getElementById("status");
 
-    function setStatus(text) { statusEl.innerHTML  = text || ""; }
+    //function setStatus(text) { statusEl.innerHTML  = text || ""; }
 
+    function setStatus(icon, text) {
+      if (!icon && !text) {
+        statusEl.innerHTML = "";
+        return;
+      }
+    
+      statusEl.innerHTML = `
+        <div style="
+          display:flex;
+          flex-direction:column;
+          align-items:center;
+          justify-content:center;
+          text-align:center;
+          min-height:48px;
+          gap:6px;
+        ">
+          ${icon ? `
+            <div style="
+              font-size:22px;
+              line-height:1;
+            ">${icon}</div>
+          ` : ""}
+          ${text ? `
+            <div style="
+              font-size:14px;
+              opacity:0.9;
+            ">${text}</div>
+          ` : ""}
+        </div>
+      `;
+    }
+    
     function setUiState(state) {
       // state: "checking" | "blocked" | "idle" | "saving" | "saved" | "error"
 
@@ -149,7 +181,7 @@ button:disabled {
         btn.classList.add("checking");
         btn.classList.remove("saving");
         btnText.textContent = "Перевірка…";
-        setStatus("⏳ Перевіряю доступ…");
+        setStatus("⏳","Перевіряю доступ…");
         return;
       }
 
@@ -173,7 +205,7 @@ button:disabled {
         btn.classList.remove("checking");
         btn.classList.add("saving");
         btnText.textContent = "Збереження…";
-        setStatus("Йде збереження…");
+        setStatus("⏳","Йде збереження…");
         return;
       }
 
@@ -185,7 +217,7 @@ button:disabled {
         btn.classList.remove("checking");
         btn.classList.remove("saving");
         btnText.textContent = "Збережено";
-        setStatus("✅ Дякуємо за заправку");
+        setStatus("✅","Дякуємо за заправку");
         return;
       }
 
@@ -208,7 +240,7 @@ button:disabled {
       btn.classList.remove("checking");
       btn.classList.remove("saving");
       btnText.textContent = "Зберегти";
-      setStatus("");
+      setStatus("","");
     }
 
     // Поточна дата/час по Києву
@@ -262,7 +294,7 @@ button:disabled {
         try { json = JSON.parse(text); } catch { json = { ok: false, error: text }; }
 
         if (!json.ok) {
-          setStatus("❌ " + (json.error || "Нема доступу"));
+          setStatus("❌", (json.error || "Нема доступу"));
           setUiState("blocked");
           return;
         }
@@ -272,7 +304,7 @@ button:disabled {
 
       } catch (e) {
         console.error(e);
-        setStatus("❌ Помилка перевірки доступу");
+        setStatus("❌","Помилка перевірки доступу");
         setUiState("blocked");
       }
     })();
@@ -326,7 +358,7 @@ button:disabled {
         try { json = JSON.parse(text); } catch { json = { ok:false, error:text }; }
 
         if (!json.ok) {
-          setStatus("❌ Помилка: " + (json.error || "unknown"));
+          setStatus("❌","Помилка: " + (json.error || "unknown"));
           setUiState("error");
           if (tg) tg.HapticFeedback?.notificationOccurred?.("error");
           return;
@@ -336,7 +368,7 @@ button:disabled {
         if (tg) tg.HapticFeedback?.notificationOccurred?.("success");
 
       } catch (err) {
-        setStatus("❌ Помилка: " + err.message);
+        setStatus("❌","Помилка: " + err.message);
         setUiState("error");
         if (tg) tg.HapticFeedback?.notificationOccurred?.("error");
       }
