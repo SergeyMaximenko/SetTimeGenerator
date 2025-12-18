@@ -138,6 +138,12 @@ button:disabled {
 
     //function setStatus(text) { statusEl.innerHTML  = text || ""; }
 
+    elLiters.addEventListener("input", () => {
+      let v = elLiters.value.replace(/\D/g, ""); // тільки цифри
+      if (v.length > 3) v = v.slice(0, 3);
+      elLiters.value = v;
+    });
+    
     function setStatus(icon, text) {
       if (!icon && !text) {
         statusEl.innerHTML = "";
@@ -333,6 +339,8 @@ button:disabled {
 
       if (!date) { alert("Вкажіть дату"); return; }
       if (!time) { alert("Вкажіть час"); return; }
+      if (elLiters.value>=200) { alert("Неправильний об'єм "); return; }
+      
 
       if (!liters) {
         if (!confirm(`Зберегти дані без вказаного об'єму ⛽ заправки?`)) return;
