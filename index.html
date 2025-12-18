@@ -35,7 +35,6 @@ body {
 input[type="number"],
 input[type="date"],
 input[type="time"] {
-  width: 100%;
   height: 56px;
   text-align: left;
   font-size: 28px;
@@ -47,7 +46,6 @@ input[type="time"] {
 }
 
 button {
-  width: 100%;
   height: 56px;
   margin-top: 18px;
   font-size: 28px;
@@ -106,11 +104,11 @@ button:disabled {
     <div class="label">Показники заправки генератора</div>
 
     <div class="field-label">Дата заправки</div>
-    <input type="date" id="date" />
+    <input type="date" style="width: 80%;" id="date" />
 
     <div class="field-label">Час заправки</div>
-    <input type="time" id="time" step="60" />
-    
+    <input type="time" style="width:80%;" id="time" step="60" />
+     
     <div class="field-label">Скільки літрів заправлено</div>
     <input type="number" id="liters" style="width:4em;" inputmode="numeric" min="0" step="1"  />
    
