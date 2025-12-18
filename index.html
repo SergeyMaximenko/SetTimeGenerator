@@ -31,12 +31,16 @@ body {
   margin-top: 14px;
   margin-bottom: 6px;
 }
-
+    
+.input-error {
+  border-color: #e53935 !important;   /* червона рамка */
+  box-shadow: 0 0 0 2px rgba(229,57,53,0.15);
+}
+    
 input[type="number"],
 input[type="date"],
 input[type="time"] {
   height: 56px;
-  text-align: left;
   font-size: 28px;
   border-radius: 14px;
   border: 2px solid #2aabee;
@@ -133,8 +137,17 @@ button:disabled {
     const btnText = document.getElementById("btnText");
     const statusEl = document.getElementById("status");
 
+    [elDate, elTime, elLiters].forEach(el => {
+      el.addEventListener("input", () => {
+        el.classList.remove("input-error");
+        setStatus("");
+      });
+    });
+    
     function setStatus(text) { statusEl.textContent = text || ""; }
 
+
+    
     function setUiState(state) {
       // state: "idle" | "saving" | "saved" | "error"
       if (state === "saving") {
@@ -203,6 +216,14 @@ button:disabled {
 
     setNowKyivDefaults();
 
+    function markError(el, hasError) {
+      if (hasError) {
+        el.classList.add("input-error");
+      } else {
+        el.classList.remove("input-error");
+      }
+    }
+    
     async function send() {
       const tg = window.Telegram?.WebApp || null;
 
