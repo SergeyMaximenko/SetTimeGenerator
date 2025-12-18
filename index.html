@@ -139,8 +139,7 @@ button:disabled {
 
     [elDate, elTime, elLiters].forEach(el => {
       el.addEventListener("input", () => {
-        el.classList.remove("input-error");
-        setStatus("");
+        markError(el);
       });
     });
     
@@ -216,8 +215,8 @@ button:disabled {
 
     setNowKyivDefaults();
 
-    function markError(el, hasError) {
-      if (hasError) {
+    function markError(el) {
+      if (!el.value) {
         el.classList.add("input-error");
       } else {
         el.classList.remove("input-error");
