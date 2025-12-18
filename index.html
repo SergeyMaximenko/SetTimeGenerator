@@ -174,9 +174,9 @@ button:disabled {
       // state: "checking" | "blocked" | "idle" | "saving" | "saved" | "error"
 
       if (state === "checking") {
-        elDate.disabled = true;
-        elLiters.disabled = true;
-        elTime.disabled = true;
+        elDate.disabled = false;
+        elLiters.disabled = false;
+        elTime.disabled = false;
         btn.disabled = true;
         btn.classList.add("checking");
         btn.classList.remove("saving");
@@ -186,9 +186,9 @@ button:disabled {
       }
 
       if (state === "blocked") {
-        //elDate.disabled = true;
-        //elLiters.disabled = true;
-        //elTime.disabled = true;
+        elDate.disabled = false;
+        elLiters.disabled = false;
+        elTime.disabled = false;
         btn.disabled = true;
         btn.classList.remove("checking");
         btn.classList.remove("saving");
