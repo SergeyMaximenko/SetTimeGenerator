@@ -137,11 +137,7 @@ button:disabled {
     const btnText = document.getElementById("btnText");
     const statusEl = document.getElementById("status");
 
-    [elDate, elTime, elLiters].forEach(el => {
-      el.addEventListener("input", () => {
-        markError(el);
-      });
-    });
+
     
     function setStatus(text) { statusEl.textContent = text || ""; }
 
@@ -215,6 +211,15 @@ button:disabled {
 
     setNowKyivDefaults();
 
+    [elDate, elTime, elLiters].forEach(el => {
+      el.addEventListener("input", () => {
+        markError(el);
+      });
+    });
+    markError(elDate);
+    markError(elTime);
+    markError(elLiters);
+    
     function markError(el) {
       if (!el.value) {
         el.classList.add("input-error");
@@ -232,6 +237,18 @@ button:disabled {
 
       if (!date) { alert("Вкажіть дату"); return; }
       if (!time) { alert("Вкажіть час"); return; }
+
+ 
+      if (tg)
+      {
+        tg.showConfirm("Підтверджуєте заправку "+liters.valie+" літрів ?", (ok) => {
+          if (!ok) {
+            return;
+          }
+        });
+      }     
+
+      
       if (!liters) { alert("Вкажіть обʼєм (літри)"); return; }
 
       console.log("SetTimeGenerator!");
