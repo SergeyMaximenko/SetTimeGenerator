@@ -136,7 +136,7 @@ button:disabled {
     const btnText = document.getElementById("btnText");
     const statusEl = document.getElementById("status");
 
-    function setStatus(text) { statusEl.textContent = text || ""; }
+    function setStatus(text) { statusEl.innerHTML  = text || ""; }
 
     function setUiState(state) {
       // state: "checking" | "blocked" | "idle" | "saving" | "saved" | "error"
