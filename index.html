@@ -91,15 +91,14 @@ button:disabled {
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
 /* Коли йде збереження */
-.saving .spinner {
-  display: inline-block;
-}
+.saving .spinner { display: inline-block; }
+
+/* Коли йде перевірка доступу */
+.checking .spinner { display: inline-block; }
 </style>
 
 </head>
@@ -126,7 +125,7 @@ button:disabled {
   </div>
 
   <script>
-    // ✅ ВСТАВ СЮДИ СВІЙ URL Apps Script (без зайвих параметрів типу ?вы=2)
+    // ✅ URL Apps Script
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec";
 
     const elDate = document.getElementById("date");
@@ -137,41 +136,41 @@ button:disabled {
     const btnText = document.getElementById("btnText");
     const statusEl = document.getElementById("status");
 
-
-    const tg = window.Telegram?.WebApp || null;
-    const params = new URLSearchParams({
-          action: "checkAccess",
-          user_id:   tg?.initDataUnsafe?.user?.id         ? String(tg.initDataUnsafe.user.id)         : "",
-          user_code: tg?.initDataUnsafe?.user?.username   ? String(tg.initDataUnsafe.user.username)   : ""
-        });
-
-  const url = GAS_URL + "?" + params.toString();
-
-  const res = await fetch(url, { method: "GET" });
-
-  // якщо GAS повернув не JSON (інколи буває при помилці деплою)
-  const text = await res.text();
-  let json;
-  try { json = JSON.parse(text); } catch { json = { ok:false, error:text }; }
-
-  if (!json.ok) {
-    setStatus("❌ " + (json.error || "unknown"));
-    btn.disabled = true; 
-  }
-    
-    
-    
     function setStatus(text) { statusEl.textContent = text || ""; }
 
-
-    
     function setUiState(state) {
-      // state: "idle" | "saving" | "saved" | "error"
+      // state: "checking" | "blocked" | "idle" | "saving" | "saved" | "error"
+
+      if (state === "checking") {
+        elDate.disabled = true;
+        elLiters.disabled = true;
+        elTime.disabled = true;
+        btn.disabled = true;
+        btn.classList.add("checking");
+        btn.classList.remove("saving");
+        btnText.textContent = "Перевірка…";
+        setStatus("⏳ Перевіряю доступ…");
+        return;
+      }
+
+      if (state === "blocked") {
+        elDate.disabled = true;
+        elLiters.disabled = true;
+        elTime.disabled = true;
+        btn.disabled = true;
+        btn.classList.remove("checking");
+        btn.classList.remove("saving");
+        btnText.textContent = "Недоступно";
+        // status вже виставляється ззовні (помилка)
+        return;
+      }
+
       if (state === "saving") {
         elDate.disabled = true;
         elLiters.disabled = true;
         elTime.disabled = true;
-        btn.disabled = true;              // щоб не натискали повторно
+        btn.disabled = true;
+        btn.classList.remove("checking");
         btn.classList.add("saving");
         btnText.textContent = "Збереження…";
         setStatus("Йде збереження…");
@@ -182,7 +181,8 @@ button:disabled {
         elDate.disabled = true;
         elLiters.disabled = true;
         elTime.disabled = true;
-        btn.disabled = true;              // після успіху лишаємо disabled
+        btn.disabled = true;
+        btn.classList.remove("checking");
         btn.classList.remove("saving");
         btnText.textContent = "Збережено";
         setStatus("✅ Дякуємо за заправку");
@@ -193,7 +193,8 @@ button:disabled {
         elDate.disabled = false;
         elLiters.disabled = false;
         elTime.disabled = false;
-        btn.disabled = false;             // при помилці даємо спробувати ще раз
+        btn.disabled = false;
+        btn.classList.remove("checking");
         btn.classList.remove("saving");
         btnText.textContent = "Зберегти";
         return;
@@ -204,6 +205,7 @@ button:disabled {
       elLiters.disabled = false;
       elTime.disabled = false;
       btn.disabled = false;
+      btn.classList.remove("checking");
       btn.classList.remove("saving");
       btnText.textContent = "Зберегти";
       setStatus("");
@@ -231,25 +233,59 @@ button:disabled {
       elTime.value = `${map.hour}:${map.minute}`;
     }
 
+    function markError(el) {
+      if (!el.value) el.classList.add("input-error");
+      else el.classList.remove("input-error");
+    }
+
+    // ✅ 1) Одразу блокуємо форму
+    setUiState("checking");
+
+    // ✅ 2) Запускаємо перевірку доступу (без top-level await)
+    (async function checkAccessOnLoad() {
+      try {
+        const tg = window.Telegram?.WebApp || null;
+
+        const params = new URLSearchParams({
+          action: "checkAccess",
+          user_id:   tg?.initDataUnsafe?.user?.id       ? String(tg.initDataUnsafe.user.id)       : "",
+          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : ""
+        });
+
+        const url = GAS_URL + "?" + params.toString();
+
+        const res = await fetch(url, { method: "GET", cache: "no-store" });
+
+        const text = await res.text();
+        let json;
+        try { json = JSON.parse(text); } catch { json = { ok: false, error: text }; }
+
+        if (!json.ok) {
+          setStatus("❌ " + (json.error || "Нема доступу"));
+          setUiState("blocked");
+          return;
+        }
+
+        // ✅ Доступ є — розблоковуємо форму
+        setUiState("idle");
+
+      } catch (e) {
+        console.error(e);
+        setStatus("❌ Помилка перевірки доступу");
+        setUiState("blocked");
+      }
+    })();
+
+    // Далі — твоя існуюча логіка
     setNowKyivDefaults();
 
     [elDate, elTime, elLiters].forEach(el => {
-      el.addEventListener("input", () => {
-        markError(el);
-      });
+      el.addEventListener("input", () => markError(el));
     });
     markError(elDate);
     markError(elTime);
     markError(elLiters);
-    
-    function markError(el) {
-      if (!el.value) {
-        el.classList.add("input-error");
-      } else {
-        el.classList.remove("input-error");
-      }
-    }
-    
+
     async function send() {
       const tg = window.Telegram?.WebApp || null;
 
@@ -260,27 +296,12 @@ button:disabled {
       if (!date) { alert("Вкажіть дату"); return; }
       if (!time) { alert("Вкажіть час"); return; }
 
-      if (!liters) 
-      {
-        if (!confirm(`Зберегти дані без вказаного об'єму ⛽ заправки?`))
-        {
-          return;
-        } 
+      if (!liters) {
+        if (!confirm(`Зберегти дані без вказаного об'єму ⛽ заправки?`)) return;
+      } else {
+        if (!confirm(`Підтверджуєте заправку \n⛽ ${elLiters.value} літрів?`)) return;
       }
-      else
-      {
-        if (!confirm(`Підтверджуєте заправку \n⛽ ${elLiters.value} літрів?`))
-        {
-          return;
-        }   
-      }
-      
-      
-        
-     // if (!liters) { alert("Вкажіть обʼєм (літри)"); return; }
 
-      console.log("SetTimeGenerator!");
-      
       try {
         setUiState("saving");
 
@@ -289,8 +310,8 @@ button:disabled {
           date_zp: `${date} ${time}`,
           liters: String(liters),
           user_id:   tg?.initDataUnsafe?.user?.id         ? String(tg.initDataUnsafe.user.id)         : "",
-          user_code: tg?.initDataUnsafe?.user?.username   ? String(tg.initDataUnsafe.user.username)   : "", 
-          user_name: tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : "", 
+          user_code: tg?.initDataUnsafe?.user?.username   ? String(tg.initDataUnsafe.user.username)   : "",
+          user_name: tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : "",
           platform:  tg?.platform || "",
           dop_param: tg?.initDataUnsafe?.start_param      ? String(tg.initDataUnsafe.start_param)     : ""
         });
@@ -299,7 +320,6 @@ button:disabled {
 
         const res = await fetch(url, { method: "GET" });
 
-        // якщо GAS повернув не JSON (інколи буває при помилці деплою)
         const text = await res.text();
         let json;
         try { json = JSON.parse(text); } catch { json = { ok:false, error:text }; }
@@ -317,7 +337,6 @@ button:disabled {
       } catch (err) {
         setStatus("❌ Помилка: " + err.message);
         setUiState("error");
-        const tg = window.Telegram?.WebApp || null;
         if (tg) tg.HapticFeedback?.notificationOccurred?.("error");
       }
     }
