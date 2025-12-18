@@ -147,28 +147,30 @@ button:disabled {
       statusEl.innerHTML = `
         <div style="
           display:flex;
-          flex-direction:column;
-          align-items:center;
-          justify-content:center;
-          text-align:center;
+          align-items:center;        /* вертикальне вирівнювання іконки + тексту */
+          justify-content:center;    /* центр по горизонталі */
           min-height:48px;
-          gap:6px;
+          gap:10px;
+          text-align:left;
         ">
           ${icon ? `
             <div style="
               font-size:22px;
               line-height:1;
+              flex-shrink:0;
             ">${icon}</div>
           ` : ""}
           ${text ? `
             <div style="
               font-size:14px;
               opacity:0.9;
+              line-height:1.25;
             ">${text}</div>
           ` : ""}
         </div>
       `;
     }
+
     
     function setUiState(state) {
       // state: "checking" | "blocked" | "idle" | "saving" | "saved" | "error"
