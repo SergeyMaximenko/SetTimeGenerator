@@ -240,17 +240,17 @@ button:disabled {
 
       if (!liters) 
       {
-        if (!confirm(`Підтверджуєте заправку \n⛽ ${elLiters.value} літрів?`))
+        if (!confirm(`Зберегти дані без вказаного об'єму заправки ⛽?`))
         {
           return;
-        }  
+        } 
       }
       else
       {
-        if (!confirm(`Зберегти дані без вказаного об'єму заправки?`))
+        if (!confirm(`Підтверджуєте заправку \n⛽ ${elLiters.value} літрів?`))
         {
           return;
-        }  
+        }   
       }
       
       
