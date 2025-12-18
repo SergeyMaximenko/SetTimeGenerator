@@ -37,6 +37,7 @@ input[type="date"],
 input[type="time"] {
   width: 100%;
   height: 56px;
+  text-align: left;
   font-size: 28px;
   border-radius: 14px;
   border: 2px solid #2aabee;
@@ -111,7 +112,7 @@ button:disabled {
     <input type="time" id="time" step="60" />
     
     <div class="field-label">Скільки літрів заправлено</div>
-    <input type="number" id="liters" inputmode="numeric" min="0" step="1"  />
+    <input type="number" id="liters" style="width:4em;" inputmode="numeric" min="0" step="1"  />
    
     <button id="btnSave" onclick="send()">
       <span class="spinner" aria-hidden="true"></span>
