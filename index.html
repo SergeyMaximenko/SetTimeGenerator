@@ -154,13 +154,13 @@ button:disabled {
       }
 
       if (state === "blocked") {
-        elDate.disabled = true;
-        elLiters.disabled = true;
-        elTime.disabled = true;
+        //elDate.disabled = true;
+        //elLiters.disabled = true;
+        //elTime.disabled = true;
         btn.disabled = true;
         btn.classList.remove("checking");
         btn.classList.remove("saving");
-        btnText.textContent = "Недоступно";
+        btnText.textContent = "Зберегти";
         // status вже виставляється ззовні (помилка)
         return;
       }
