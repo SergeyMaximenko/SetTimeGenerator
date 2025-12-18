@@ -144,6 +144,7 @@ button:disabled {
         return;
       }
     
+      
       statusEl.innerHTML = `
         <div style="
           display:flex;
@@ -174,7 +175,9 @@ button:disabled {
     
     function setUiState(state) {
       // state: "checking" | "blocked" | "idle" | "saving" | "saved" | "error"
-
+      const tg = window.Telegram?.WebApp || null;
+      var userName = tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : "";
+      
       if (state === "checking") {
         elDate.disabled = false;
         elLiters.disabled = false;
@@ -219,7 +222,7 @@ button:disabled {
         btn.classList.remove("checking");
         btn.classList.remove("saving");
         btnText.textContent = "Збережено";
-        setStatus("✅","Дякуємо за заправку");
+        setStatus("✅",userName+", дякуємо за заправку");
         return;
       }
 
@@ -242,7 +245,7 @@ button:disabled {
       btn.classList.remove("checking");
       btn.classList.remove("saving");
       btnText.textContent = "Зберегти";
-      setStatus("🔑","У вас є доступ до внесення показників");
+      setStatus("🔑",userName+", у вас є доступ до внесення показників");
     }
 
     // Поточна дата/час по Києву
