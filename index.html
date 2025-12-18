@@ -32,6 +32,7 @@ body {
   margin-bottom: 6px;
 }
 
+input[type="number"],
 input[type="date"],
 input[type="time"] {
   width: 100%;
@@ -101,14 +102,17 @@ button:disabled {
 
 <body>
   <div class="box">
-    <div class="label">Вкажіть дату та час заправки генератора</div>
+    <div class="label">Показники заправки генератора</div>
 
-    <div class="field-label">Дата</div>
+    <div class="field-label">Дата заправки</div>
     <input type="date" id="date" />
 
-    <div class="field-label">Час</div>
+    <div class="field-label">Час заправки</div>
     <input type="time" id="time" step="60" />
-
+    
+    <div class="field-label">Скільки літрів заправлено</div>
+    <input type="number" id="liters" inputmode="numeric" min="0" step="1"  />
+   
     <button id="btnSave" onclick="send()">
       <span class="spinner" aria-hidden="true"></span>
       <span id="btnText">Зберегти</span>
@@ -123,6 +127,8 @@ button:disabled {
 
     const elDate = document.getElementById("date");
     const elTime = document.getElementById("time");
+    const elLiters = document.getElementById("liters");
+    
     const btn = document.getElementById("btnSave");
     const btnText = document.getElementById("btnText");
     const statusEl = document.getElementById("status");
@@ -133,6 +139,7 @@ button:disabled {
       // state: "idle" | "saving" | "saved" | "error"
       if (state === "saving") {
         elDate.disabled = true;
+        elLiters.disabled = true;
         elTime.disabled = true;
         btn.disabled = true;              // щоб не натискали повторно
         btn.classList.add("saving");
@@ -143,6 +150,7 @@ button:disabled {
 
       if (state === "saved") {
         elDate.disabled = true;
+        elLiters.disabled = true;
         elTime.disabled = true;
         btn.disabled = true;              // після успіху лишаємо disabled
         btn.classList.remove("saving");
@@ -153,6 +161,7 @@ button:disabled {
 
       if (state === "error") {
         elDate.disabled = false;
+        elLiters.disabled = false;
         elTime.disabled = false;
         btn.disabled = false;             // при помилці даємо спробувати ще раз
         btn.classList.remove("saving");
@@ -162,6 +171,7 @@ button:disabled {
 
       // idle
       elDate.disabled = false;
+      elLiters.disabled = false;
       elTime.disabled = false;
       btn.disabled = false;
       btn.classList.remove("saving");
@@ -198,9 +208,11 @@ button:disabled {
 
       const date = elDate.value;
       const time = elTime.value;
+      const liters = elLiters.value;
 
       if (!date) { alert("Вкажіть дату"); return; }
       if (!time) { alert("Вкажіть час"); return; }
+      if (!liters) { alert("Вкажіть обʼєм (літри)"); return; }
 
       console.log("SetTimeGenerator!");
       
@@ -210,6 +222,7 @@ button:disabled {
         const params = new URLSearchParams({
           action: "save",
           date_zp: `${date} ${time}`,
+          liters: String(liters),
           user_id:   tg?.initDataUnsafe?.user?.id         ? String(tg.initDataUnsafe.user.id)         : "",
           user_code: tg?.initDataUnsafe?.user?.username   ? String(tg.initDataUnsafe.user.username)   : "", 
           user_name: tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : "", 
