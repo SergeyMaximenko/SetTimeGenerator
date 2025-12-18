@@ -202,6 +202,8 @@ button:disabled {
       if (!date) { alert("Вкажіть дату"); return; }
       if (!time) { alert("Вкажіть час"); return; }
 
+      console.log("SetTimeGenerator!");
+      
       try {
         setUiState("saving");
 
