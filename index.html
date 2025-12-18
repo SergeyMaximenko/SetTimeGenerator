@@ -201,17 +201,17 @@ button:disabled {
 
       if (!date) { alert("Вкажіть дату"); return; }
       if (!time) { alert("Вкажіть час"); return; }
-console.log("Save");
+
       try {
         setUiState("saving");
 
         const params = new URLSearchParams({
           action: "save",
-          user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
-          username: tg?.initDataUnsafe?.user?.username || "",
-          platform: tg?.platform || "",
-          chat_id: tg?.initDataUnsafe?.chat?.id ? String(tg.initDataUnsafe.chat.id) : "",
-          message_id: tg?.initDataUnsafe?.message_id ? String(tg.initDataUnsafe.message_id) : "",
+          user_id:   tg?.initDataUnsafe?.user?.id         ? String(tg.initDataUnsafe.user.id)         : "",
+          user_name: tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : "", 
+          user_code: tg?.initDataUnsafe?.user?.username   ? String(tg.initDataUnsafe.user.username)   : "", 
+          dop_param: tg?.initDataUnsafe?.start_param      ? String(tg.initDataUnsafe.start_param)     : "", 
+          platform:  tg?.platform || "",
           datetime: `${date} ${time}`
         });
 
