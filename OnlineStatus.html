@@ -8,11 +8,20 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
+    .card{
+  border: 2px solid rgba(42,171,238,0.35);
+  border-radius: 16px;
+  padding: 14px 14px;
+  background: #fff;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+}
+    
     body{
       margin:0;
       padding:16px;
       font-family:-apple-system, Segoe UI, Roboto, Arial;
-      background:#fff;
+      __background:#fff;
+      background:#f6f7f9;
     }
 
     .box{
@@ -73,10 +82,11 @@
     </div>
   </div>
 
-  <div class="box">
-    <!-- Единственное HTML поле -->
+<div class="box">
+  <div class="card">
     <div id="content" class="content"></div>
   </div>
+</div>
 
   <script>
 
