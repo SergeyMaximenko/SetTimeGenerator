@@ -276,6 +276,46 @@ button:disabled {
       elTime.value = `${map.hour}:${map.minute}`;
     }
 
+    // ✅ "Зараз" у Києві як Date (для перевірок)
+function getNowKyiv() {
+  const tz = "Europe/Kyiv";
+  const d = new Date();
+
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: tz,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false
+  }).formatToParts(d);
+
+  const m = {};
+  for (const p of parts) if (p.type !== "literal") m[p.type] = p.value;
+
+  // Создаём Date из "киевских" компонент
+  return new Date(
+    Number(m.year),
+    Number(m.month) - 1,
+    Number(m.day),
+    Number(m.hour),
+    Number(m.minute),
+    Number(m.second)
+  );
+}
+
+// ✅ Парсим введённые date+time в Date
+function parseInputDateTime(dateStr, timeStr) {
+  const [y, mo, d] = (dateStr || "").split("-").map(Number);
+  const [hh, mm] = (timeStr || "").split(":").map(Number);
+
+  if (!y || !mo || !d || Number.isNaN(hh) || Number.isNaN(mm)) return null;
+
+  return new Date(y, mo - 1, d, hh, mm, 0);
+}
+    
     function markError(el) {
       if (!el.value) el.classList.add("input-error");
       else el.classList.remove("input-error");
@@ -341,7 +381,22 @@ button:disabled {
       if (!time) { alert("Вкажіть час"); return; }
       if (elLiters.value>=200) { alert("Неправильний об'єм "); return; }
       
+// ✅ Перевірки часу (за Києвом)
+const nowKyiv = getNowKyiv();
+const inputDt = parseInputDateTime(date, time);
 
+if (!inputDt) {
+  alert("Некоректно вказані дата або час");
+  return;
+}
+
+// 1) Не може бути пізніше поточного часу (Київ)
+if (inputDt.getTime() > nowKyiv.getTime()) {
+  alert("❗ Вказаний час не може бути більшим за поточний ");
+  return;
+}
+
+      
       if (!liters) {
         if (!confirm(`Зберегти дані без вказаного об'єму ⛽ заправки?`)) return;
       } else {
