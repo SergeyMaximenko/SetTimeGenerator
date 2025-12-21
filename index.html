@@ -328,12 +328,16 @@ function parseInputDateTime(dateStr, timeStr) {
     (async function checkAccessOnLoad() {
       try {
         const tg = window.Telegram?.WebApp || null;
-
+        
+        const u = tg?.initDataUnsafe?.user;
+        const userName = u
+  ? [u.first_name, u.last_name].filter(Boolean).join(" ")
+  : "";
         const params = new URLSearchParams({
           action: "checkAccess",
           user_id:   tg?.initDataUnsafe?.user?.id       ? String(tg.initDataUnsafe.user.id)       : "",
           user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
-          user_name: tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : ""
+          user_name: userName
         });
 
         const url = GAS_URL + "?" + params.toString();
