@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <title>Онлайн показники</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body{
+      margin:0;
+      padding:16px;
+      font-family:-apple-system, Segoe UI, Roboto, Arial;
+      background:#fff;
+    }
+
+    .box{
+      max-width:520px;
+      margin:0 auto;
+    }
+
+    /* поле, куда вставляем HTML */
+    .content{
+      font-size:14px;
+      line-height:1.35;
+    }
+
+    /* ===== Loader (центр экрана) ===== */
+    .loader{
+      position:fixed;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      background:#fff;
+      z-index:9999;
+    }
+
+    .loader-inner{
+      display:flex;
+      flex-direction:column;
+      align-items:center;
+      justify-content:center;
+      gap:12px;
+      text-align:center;
+    }
+
+    .spinner{
+      width:28px;
+      height:28px;
+      border-radius:50%;
+      border:4px solid rgba(42,171,238,0.25);
+      border-top-color:#2aabee;
+      animation:spin .8s linear infinite;
+    }
+
+    @keyframes spin{ to{ transform:rotate(360deg); } }
+
+    .loader-text{
+      font-size:14px;
+      opacity:.85;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Loader -->
+  <div id="loader" class="loader">
+    <div class="loader-inner">
+      <div class="spinner" aria-hidden="true"></div>
+      <div class="loader-text">Виконується завантаження…</div>
+    </div>
+  </div>
+
+  <div class="box">
+    <!-- Единственное HTML поле -->
+    <div id="content" class="content"></div>
+  </div>
+
+  <script>
+
+    // Вариант 2: через твой GAS action (как ты делал раньше)
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec";
+
+
+    const loaderEl  = document.getElementById("loader");
+    const contentEl = document.getElementById("content");
+
+    function showLoader(show){
+      loaderEl.style.display = show ? "flex" : "none";
+    }
+
+    async function loadHtml() {
+      const tg = window.Telegram?.WebApp || null;
+
+
+    const params = new URLSearchParams({
+          action: "getStatus",
+          dop_param: tg?.initDataUnsafe?.start_param      ? String(tg.initDataUnsafe.start_param)     : ""
+        });
+console.log("Привет, консоль");
+    const url = GAS_URL + "?" + params.toString();
+
+
+
+
+
+
+
+
+
+      try {
+        showLoader(true);
+
+
+        const res = await fetch(url, { method: "GET", cache: "no-store" });
+
+  
+        const text = await res.text();
+        let json;
+        json = JSON.parse(text); 
+
+
+        // вставляем HTML как есть
+        contentEl.innerHTML = textToHtml(json.message);
+
+      } catch (err) {
+        console.error(err);
+        contentEl.innerHTML = `
+          <div style="color:#e53935;font-weight:700;">❌ Помилка завантаження</div>
+          <div style="margin-top:6px;">Спробуйте пізніше.</div>
+        `;
+      } finally {
+        showLoader(false);
+      }
+    }
+
+function textToHtml(text) {
+  return text
+    .replace(/\r\n/g, "\n")   // Windows → Unix
+    .replace(/\n\n+/g, "<br><br>") // пустая строка
+    .replace(/\n/g, "<br>");
+}
+
+
+    // старт при загрузке
+    loadHtml();
+  </script>
+</body>
+</html>
