@@ -399,7 +399,7 @@ if (inputDt.getTime() > nowKyiv.getTime()) {
   alert("❗ Вказаний час не може бути більшим за поточний ");
   return;
 }
-
+console.log("send");
       
       if (!liters) {
         if (!confirm(`Зберегти дані без вказаного об'єму ⛽ заправки?`)) return;
@@ -409,7 +409,7 @@ if (inputDt.getTime() > nowKyiv.getTime()) {
 
       try {
         setUiState("saving");
-
+         const u = tg?.initDataUnsafe?.user;
          const userName = u
   ? [u.first_name, u.last_name].filter(Boolean).join(" ")
   : "";
