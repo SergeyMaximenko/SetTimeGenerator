@@ -115,10 +115,11 @@
           action: "getStatus",
           user_id:   tg?.initDataUnsafe?.user?.id       ? String(tg.initDataUnsafe.user.id)       : "",
           user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+          platform:  tg?.platform || "",
           user_name: userName,
           dop_param: tg?.initDataUnsafe?.start_param      ? String(tg.initDataUnsafe.start_param)     : ""
         });
-console.log("Привет, консоль");
+console.log("!!");
     const url = GAS_URL + "?" + params.toString();
 
 
