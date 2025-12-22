@@ -105,9 +105,17 @@
     async function loadHtml() {
       const tg = window.Telegram?.WebApp || null;
 
-
+      const u = tg?.initDataUnsafe?.user;
+      const userName = u
+  ? [u.first_name, u.last_name].filter(Boolean).join(" ")
+  : "";
+  
+      
     const params = new URLSearchParams({
           action: "getStatus",
+          user_id:   tg?.initDataUnsafe?.user?.id       ? String(tg.initDataUnsafe.user.id)       : "",
+          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+          user_name: userName,
           dop_param: tg?.initDataUnsafe?.start_param      ? String(tg.initDataUnsafe.start_param)     : ""
         });
 console.log("Привет, консоль");
