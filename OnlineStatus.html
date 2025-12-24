@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="uk">
+
 <head>
   <meta charset="utf-8" />
   <title>Онлайн показники</title>
@@ -8,74 +9,95 @@
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
-    .card{
-  __display: inline-block;   /* 🔑 ключевая строка */
-  border: 2px solid rgba(42,171,238,0.35);
-  border-radius: 16px;
-  padding: 14px 14px;
-  background: #fff;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-}
-    
-    body{
-      margin:0;
-      padding:16px;
-      font-family:-apple-system, Segoe UI, Roboto, Arial;
-      __background:#fff;
-      background:#f6f7f9;
+    .card {
+      __display: inline-block;
+      /* 🔑 ключевая строка */
+      border: 2px solid rgba(42, 171, 238, 0.35);
+      border-radius: 16px;
+      padding: 14px 14px;
+      background: #fff;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
     }
 
-    .box{
-      max-width:520px;
-      margin:0 auto;
+    .test-badge {
+      margin: 0 auto 12px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: #e53935;
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: center;
+      width: fit-content;
+      display: none;
+      /* приховано за замовчуванням */
+    }
+
+
+    body {
+      margin: 0;
+      padding: 16px;
+      font-family: -apple-system, Segoe UI, Roboto, Arial;
+      __background: #fff;
+      background: #f6f7f9;
+    }
+
+    .box {
+      max-width: 520px;
+      margin: 0 auto;
     }
 
     /* поле, куда вставляем HTML */
-    .content{
-      font-size:18px;
-      line-height:1.45;
+    .content {
+      font-size: 18px;
+      line-height: 1.45;
     }
 
     /* ===== Loader (центр экрана) ===== */
-    .loader{
-      position:fixed;
-      inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      background:#fff;
-      z-index:9999;
+    .loader {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      z-index: 9999;
     }
 
-    .loader-inner{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      gap:12px;
-      text-align:center;
+    .loader-inner {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      text-align: center;
     }
 
-    .spinner{
-      width:28px;
-      height:28px;
-      border-radius:50%;
-      border:4px solid rgba(42,171,238,0.25);
-      border-top-color:#2aabee;
-      animation:spin .8s linear infinite;
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 4px solid rgba(42, 171, 238, 0.25);
+      border-top-color: #2aabee;
+      animation: spin .8s linear infinite;
     }
 
-    @keyframes spin{ to{ transform:rotate(360deg); } }
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
 
-    .loader-text{
-      font-size:14px;
-      opacity:.85;
+    .loader-text {
+      font-size: 14px;
+      opacity: .85;
     }
   </style>
 </head>
 
 <body>
   <!-- Loader -->
+  <div id="testBadge" class="test-badge">Тестовий режим</div>
   <div id="loader" class="loader">
     <div class="loader-inner">
       <div class="spinner" aria-hidden="true"></div>
@@ -83,11 +105,11 @@
     </div>
   </div>
 
-<div class="box">
-  <div class="card">
-    <div id="content" class="content"></div>
+  <div class="box">
+    <div class="card">
+      <div id="content" class="content"></div>
+    </div>
   </div>
-</div>
 
   <script>
 
@@ -95,10 +117,22 @@
     const GAS_URL = "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec";
 
 
-    const loaderEl  = document.getElementById("loader");
+    const loaderEl = document.getElementById("loader");
     const contentEl = document.getElementById("content");
 
-    function showLoader(show){
+
+    const testBadge = document.getElementById("testBadge");
+
+    const tg = window.Telegram?.WebApp || null;
+    const startParam = tg?.initDataUnsafe?.start_param
+      ? String(tg.initDataUnsafe.start_param)
+      : "";
+
+    if (startParam.includes("IsTest=Yes") ) {
+      testBadge.style.display = "block";
+    }
+
+    function showLoader(show) {
       loaderEl.style.display = show ? "flex" : "none";
     }
 
@@ -107,20 +141,20 @@
 
       const u = tg?.initDataUnsafe?.user;
       const userName = u
-  ? [u.first_name, u.last_name].filter(Boolean).join(" ")
-  : "";
-  
-      
-    const params = new URLSearchParams({
-          action: "getStatus",
-          user_id:   tg?.initDataUnsafe?.user?.id       ? String(tg.initDataUnsafe.user.id)       : "",
-          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
-          platform:  tg?.platform || "",
-          user_name: userName,
-          dop_param: tg?.initDataUnsafe?.start_param      ? String(tg.initDataUnsafe.start_param)     : ""
-        });
-console.log("!!");
-    const url = GAS_URL + "?" + params.toString();
+        ? [u.first_name, u.last_name].filter(Boolean).join(" ")
+        : "";
+
+
+      const params = new URLSearchParams({
+        action: "getStatus",
+        user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+        user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+        platform: tg?.platform || "",
+        user_name: userName,
+        dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
+      });
+      console.log("!!");
+      const url = GAS_URL + "?" + params.toString();
 
 
 
@@ -136,10 +170,10 @@ console.log("!!");
 
         const res = await fetch(url, { method: "GET", cache: "no-store" });
 
-  
+
         const text = await res.text();
         let json;
-        json = JSON.parse(text); 
+        json = JSON.parse(text);
 
 
         // вставляем HTML как есть
@@ -156,16 +190,17 @@ console.log("!!");
       }
     }
 
-function textToHtml(text) {
-  return text
-    .replace(/\r\n/g, "\n")   // Windows → Unix
-    .replace(/\n\n+/g, "<br><br>") // пустая строка
-    .replace(/\n/g, "<br>");
-}
+    function textToHtml(text) {
+      return text
+        .replace(/\r\n/g, "\n")   // Windows → Unix
+        .replace(/\n\n+/g, "<br><br>") // пустая строка
+        .replace(/\n/g, "<br>");
+    }
 
 
     // старт при загрузке
     loadHtml();
   </script>
 </body>
+
 </html>
