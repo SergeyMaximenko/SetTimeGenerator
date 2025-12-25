@@ -2,6 +2,7 @@
 <html lang="uk">
 
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded" rel="stylesheet" />
     <meta charset="utf-8" />
     <title>Відомість по винагороді</title>
 
@@ -224,80 +225,123 @@
 
 
 
-/* ===== Summary (красиве резюме) ===== */
-.summary{
-  margin-top: 14px;
-  padding: 12px 12px;
-  border-radius: 14px;
-  background: rgba(42,171,238,.08);
-  border: 1px solid rgba(42,171,238,.28);
-  text-align:center;            /* центр по горизонтали */
-}
+        /* ===== Summary (красиве резюме) ===== */
+        .summary {
+            margin-top: 14px;
+            padding: 12px 12px;
+            border-radius: 14px;
+            background: rgba(42, 171, 238, .08);
+            border: 1px solid rgba(42, 171, 238, .28);
+            text-align: center;
+            /* центр по горизонтали */
+        }
 
-.summary-top{
+        .summary-top {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 12px;
+            /* было 10px — сделай больше */
+        }
+
+        .summary-title {
+            font-size: 16px;
+            font-weight: 900;
+            line-height: 1.2;
+            text-align: center;
+            /* центр по горизонтали */
+        }
+
+        .summary-period {
+            font-weight: 800;
+            text-align: center;
+            /* центр по горизонтали */
+
+        }
+
+        .summary-total {
+            font-size: 16px;
+            font-weight: 900;
+            white-space: nowrap;
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .summary-item {
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, .08);
+            border-radius: 12px;
+            padding: 10px 10px;
+            text-align: center;
+            /* центр по горизонтали */
+        }
+
+        .summary-label {
+            font-size: 12px;
+            opacity: .75;
+            font-weight: 800;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .summary-value {
+            font-size: 18px;
+            font-weight: 900;
+            line-height: 1.1;
+            text-align: center;
+            /* на всякий случай */
+        }
+
+        .summary-value.small {
+            font-size: 16px;
+        }
+
+        @media (max-width: 360px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+button{
   display:flex;
   align-items:center;
   justify-content:center;
   gap:10px;
-  margin-bottom: 12px;  /* было 10px — сделай больше */
 }
 
-.summary-title{
-  font-size: 16px;
-  font-weight: 900;
-  line-height: 1.2;
-    text-align:center;            /* центр по горизонтали */
+button .icon{
+  font-size:24px;
+  line-height:1;
 }
 
-.summary-period{
-  font-weight: 800;
-  text-align:center;            /* центр по горизонтали */
-
+#calcBtn{
+  transition: transform .12s ease, box-shadow .12s ease;
 }
 
-.summary-total{
-  font-size: 16px;
-  font-weight: 900;
-  white-space: nowrap;
+#calcBtn:active{
+  transform: scale(0.97);
+  box-shadow: 0 4px 10px rgba(0,0,0,.18) inset;
 }
 
-.summary-grid{
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px;
+@keyframes spinIcon{
+  to { transform: rotate(360deg); }
 }
 
-.summary-item{
-  background: #fff;
-  border: 1px solid rgba(0,0,0,.08);
-  border-radius: 12px;
-  padding: 10px 10px;
-  text-align:center;            /* центр по горизонтали */
+#calcBtn.loading .icon{
+  animation: spinIcon .8s linear infinite;
+  transform-origin: 50% 50%;
 }
 
-.summary-label{
-  font-size: 12px;
-  opacity: .75;
-  font-weight: 800;
-  margin-bottom: 6px;
-  text-align:center;
+/* чтобы при loading не срабатывало "нажатие" */
+#calcBtn.loading:active{
+  transform: none;
+  box-shadow: none;
 }
-
-.summary-value{
-  font-size: 18px;
-  font-weight: 900;
-  line-height: 1.1;
-  text-align:center;            /* на всякий случай */
-}
-
-.summary-value.small{
-  font-size: 16px;
-}
-
-@media (max-width: 360px){
-  .summary-grid{ grid-template-columns: 1fr; }
-}
-
 
 
 
@@ -326,7 +370,13 @@
                 </div>
             </div>
 
-            <button id="calcBtn">🧮 Розрахувати</button>
+            <button id="calcBtn">
+                <span class="material-symbols-rounded icon">calculate</span>
+                <span class="btn-text">Розрахувати</span>
+                
+            </button>
+
+            <!--<button id="calcBtn">⚙️ Розрахувати</button> -->
             <div id="calcSpinner" class="calc-spinner"></div>
 
             <!-- Результат -->
@@ -348,7 +398,7 @@
             </div>
 
             <div id="emptyBlock" class="hidden empty">
-                Відсутні дані за <b id="emptyPeriod"></b> по заправці генератора
+                Дані по заправці генератора за <b id="emptyPeriod"></b> відсутні
             </div>
 
             <!-- Помилка -->
@@ -441,9 +491,9 @@
 
 
         function renderSummary({ y, m, totalAmount, totalRefuels }) {
-  const period = `${MONTHS[m - 1]} ${y} р.`;
+            const period = `${MONTHS[m - 1]} ${y} р.`;
 
-  return `
+            return `
     <div class="summary-top">
       <div class="summary-title">
         Всього за <span class="summary-period">${period}</span>
@@ -462,17 +512,23 @@
       </div>
     </div>
   `;
-}
+        }
 
 
         function money(v) { return v.toLocaleString("uk-UA") + " грн"; }
 
         async function calculate() {
+
+            //var calcBtnText = calcBtn.querySelector(".btn-text");
+            //calcBtnTextOld = calcBtnText.textContent;
             calcBtn.disabled = true;
+            calcBtn.classList.add("loading");
+            //calcBtnText.textContent = "Чекайте ...";
             spinner.style.display = "block";
             resultBlock.classList.add("hidden");
             emptyBlock.classList.add("hidden");
             errorBlock.classList.add("hidden");
+            
 
             const y = +yearSel.value, m = +monthSel.value;
 
@@ -516,7 +572,7 @@
                     throw new Error(json.error || "Помилка сервера");
                 }
 
-    
+
 
                 if (!json.rows || json.rows.length === 0) {
 
@@ -541,12 +597,12 @@
                      `).join("");
 
 
-                    
+
                     summaryEl.innerHTML = renderSummary({
-                    y,
-                    m,
-                    totalAmount: json.totalAmount,
-                    totalRefuels : json.totalRefuels
+                        y,
+                        m,
+                        totalAmount: json.totalAmount,
+                        totalRefuels: json.totalRefuels
                     });
 
 
@@ -567,6 +623,8 @@
 
             } finally {
                 spinner.style.display = "none";
+                calcBtn.classList.remove("loading");
+                //calcBtnText.textContent = calcBtnTextOld;
                 calcBtn.disabled = false;
             }
         }
