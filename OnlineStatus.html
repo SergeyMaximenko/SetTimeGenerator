@@ -30,7 +30,8 @@
       text-align: center;
       width: fit-content;
       display: none;
-       z-index: 10000; /* больше чем 9999 */
+      z-index: 10000;
+      /* больше чем 9999 */
       /* приховано за замовчуванням */
     }
 
@@ -98,7 +99,7 @@
 
 <body>
   <!-- Loader -->
-   <div id="testBadge" class="test-badge">Тестовий режим</div>
+  <div id="testBadge" class="test-badge">Тестовий режим</div>
   <div id="loader" class="loader">
     <div class="loader-inner">
       <div class="spinner" aria-hidden="true"></div>
@@ -129,9 +130,7 @@
       ? String(tg.initDataUnsafe.start_param)
       : "";
 
-    if (startParam.includes("IsTest=Yes")   ) {
-      testBadge.style.display = "block";
-    }
+
 
     function showLoader(show) {
       loaderEl.style.display = show ? "flex" : "none";
@@ -188,6 +187,11 @@
         `;
       } finally {
         showLoader(false);
+
+        if (startParam.includes("IsTest=Yes") || 1==1) {
+          testBadge.style.display = "block";
+        }
+
       }
     }
 
