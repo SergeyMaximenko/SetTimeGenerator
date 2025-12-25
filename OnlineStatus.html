@@ -30,6 +30,7 @@
       text-align: center;
       width: fit-content;
       display: none;
+       z-index: 10000; /* больше чем 9999 */
       /* приховано за замовчуванням */
     }
 
@@ -97,9 +98,9 @@
 
 <body>
   <!-- Loader -->
+   <div id="testBadge" class="test-badge">Тестовий режим</div>
   <div id="loader" class="loader">
     <div class="loader-inner">
-      <div id="testBadge" class="test-badge">Тестовий режим</div>
       <div class="spinner" aria-hidden="true"></div>
       <div class="loader-text">Виконується завантаження…</div>
     </div>
