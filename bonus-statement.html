@@ -1,267 +1,571 @@
 <!doctype html>
 <html lang="uk">
+
 <head>
-  <meta charset="utf-8" />
-  <title>Відомість по бонусу</title>
+    <meta charset="utf-8" />
+    <title>Відомість по винагороді</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <style>
-    body{
-      margin:0;
-      padding:16px;
-      font-family:-apple-system, Segoe UI, Roboto, Arial;
-      background:#f6f7f9;
-    }
-    .box{ max-width:520px; margin:0 auto; }
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: -apple-system, Segoe UI, Roboto, Arial;
+            background: #f6f7f9;
+        }
 
-    .card{
-      border: 2px solid rgba(42, 171, 238, 0.35);
-      border-radius: 16px;
-      padding: 14px;
-      background: #fff;
-      box-shadow: 0 10px 24px rgba(0,0,0,0.08);
-    }
+        .box {
+            max-width: 520px;
+            margin: 0 auto;
+        }
 
-    .title{
-      text-align:center;
-      font-size:22px;
-      font-weight:800;
-      margin: 4px 0 14px;
-    }
+        .card {
+            border: 2px solid rgba(42, 171, 238, 0.35);
+            border-radius: 16px;
+            padding: 14px;
+            background: #fff;
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+        }
 
-    .row{
-      display:flex;
-      gap:10px;
-      align-items:flex-end;
-      flex-wrap:wrap;
-      margin-bottom: 12px;
-    }
+        .title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 800;
+            margin: 4px 0 14px;
+        }
 
-    .field{ flex:1 1 140px; }
-    .field-label{
-      font-size:14px;
-      font-weight:700;
-      margin-bottom:6px;
-      opacity:.85;
-    }
+        .row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
 
-    select{
-      width:100%;
-      height:44px;
-      font-size:18px;
-      border-radius:12px;
-      border:2px solid rgba(42,171,238,.6);
-      padding:0 10px;
-      box-sizing:border-box;
-      background:#fff;
-    }
+        .field {
+            flex: 1 1 140px;
+        }
 
-    button{
-      width:100%;
-      height:50px;
-      margin-top:4px;
-      font-size:20px;
-      border:0;
-      border-radius:14px;
-      background:#2aabee;
-      color:#fff;
-      font-weight:800;
-      cursor:pointer;
-    }
-    button:disabled{ opacity:.7; cursor:not-allowed; }
+        .field-label {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            opacity: .85;
+        }
 
-    /* === spinner under button === */
-    .calc-spinner{
-      display:none;
-      margin:14px auto 0;
-      width:28px;
-      height:28px;
-      border-radius:50%;
-      border:4px solid rgba(42,171,238,.25);
-      border-top-color:#2aabee;
-      animation:spin .8s linear infinite;
-    }
-    @keyframes spin{ to{ transform:rotate(360deg); } }
+        select {
+            width: 100%;
+            height: 44px;
+            font-size: 18px;
+            border-radius: 12px;
+            border: 2px solid rgba(42, 171, 238, .6);
+            padding: 0 10px;
+            box-sizing: border-box;
+            background: #fff;
+        }
 
-    .summary{
-      margin-top:14px;
-      padding:10px 12px;
-      border-radius:12px;
-      background:rgba(42,171,238,.08);
-      border:1px solid rgba(42,171,238,.25);
-      font-size:16px;
-    }
-    .summary b{ font-weight:900; }
+        button {
+            width: 100%;
+            height: 50px;
+            margin-top: 4px;
+            font-size: 20px;
+            border: 0;
+            border-radius: 14px;
+            background: #2aabee;
+            color: #fff;
+            font-weight: 800;
+            cursor: pointer;
+        }
 
-    table{
-      width:100%;
-      margin-top:12px;
-      border-collapse:separate;
-      border-spacing:0;
-      border-radius:14px;
-      overflow:hidden;
-      border:1px solid rgba(0,0,0,.08);
-    }
+        button:disabled {
+            opacity: .7;
+            cursor: not-allowed;
+        }
 
-    thead th{
-      background:#f2f6fb;
-      font-size:13px;
-      text-align:left;
-      padding:10px;
-      border-bottom:1px solid rgba(0,0,0,.08);
-    }
+        /* === spinner under button === */
+        .calc-spinner {
+            display: none;
+            margin: 14px auto 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 4px solid rgba(42, 171, 238, .25);
+            border-top-color: #2aabee;
+            animation: spin .8s linear infinite;
+        }
 
-    tbody td{
-      font-size:14px;
-      padding:10px;
-      border-bottom:1px solid rgba(0,0,0,.06);
-      background:#fff;
-      vertical-align:top;
-    }
-    tbody tr:last-child td{ border-bottom:0; }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
-    .money{ font-weight:800; white-space:nowrap; }
+        .summary {
+            margin-top: 14px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(42, 171, 238, .08);
+            border: 1px solid rgba(42, 171, 238, .25);
+            font-size: 16px;
+        }
 
-    a{ color:#2aabee; text-decoration:none; }
+        .summary b {
+            font-weight: 900;
+        }
 
-    .hidden{ display:none; }
+        table {
+            width: 100%;
+            margin-top: 12px;
+            border-collapse: separate;
+            border-spacing: 0;
+            border-radius: 14px;
+            overflow: hidden;
+            border: 1px solid rgba(0, 0, 0, .08);
+        }
 
-    .error{
-      margin-top:12px;
-      padding:10px 12px;
-      border-radius:12px;
-      background:rgba(229,57,53,.08);
-      border:1px solid rgba(229,57,53,.25);
-    }
+        thead th {
+            background: #f2f6fb;
+            font-size: 13px;
+            text-align: left;
+            padding: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, .08);
+        }
 
-    .table-wrap{
-  width:100%;
-  overflow-x:auto;
-  -webkit-overflow-scrolling: touch;
-  border-radius:14px;
+        tbody td {
+            font-size: 14px;
+            padding: 10px;
+            border-bottom: 1px solid rgba(0, 0, 0, .06);
+            background: #fff;
+            vertical-align: top;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .money {
+            font-weight: 800;
+            white-space: nowrap;
+        }
+
+        a {
+            color: #2aabee;
+            text-decoration: none;
+        }
+
+
+        .error {
+            margin-top: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            background: rgba(229, 57, 53, .08);
+            border: 1px solid rgba(229, 57, 53, .25);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* по горизонтали */
+            justify-content: center;
+            /* по вертикали (если будет высота) */
+            text-align: center;
+
+        }
+
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            border-radius: 14px;
+        }
+
+        /* 1) фиксируем раскладку колонок */
+        .table-wrap table {
+            _min-width: 520px;
+
+        }
+
+
+        .test-badge {
+            margin: 0 auto 12px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            background: #e53935;
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            width: fit-content;
+            display: none;
+            /* приховано за замовчуванням */
+        }
+
+
+
+        .error-title {
+            color: #e53935;
+            font-weight: 900;
+            margin-bottom: 6px;
+        }
+
+        .empty {
+            margin-top: 16px;
+            padding: 16px 12px;
+            border-radius: 12px;
+            background: rgba(42, 171, 238, .06);
+            border: 1px dashed rgba(42, 171, 238, .35);
+
+            text-align: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #555;
+        }
+
+
+
+
+/* ===== Summary (красиве резюме) ===== */
+.summary{
+  margin-top: 14px;
+  padding: 12px 12px;
+  border-radius: 14px;
+  background: rgba(42,171,238,.08);
+  border: 1px solid rgba(42,171,238,.28);
 }
-/* чтобы таблица нормально считалась внутри скролла */
-.table-wrap table{
-  min-width: 520px; /* можно 480/520/560 — по вкусу */
+
+.summary-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom: 10px;
 }
 
-    .error-title{ color:#e53935; font-weight:900; }
-  </style>
+.summary-title{
+  font-size: 16px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.summary-period{
+  font-weight: 800;
+}
+
+.summary-total{
+  font-size: 16px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.summary-item{
+  background: #fff;
+  border: 1px solid rgba(0,0,0,.08);
+  border-radius: 12px;
+  padding: 10px 10px;
+}
+
+.summary-label{
+  font-size: 12px;
+  opacity: .75;
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+
+.summary-value{
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1.1;
+}
+
+.summary-value.small{
+  font-size: 16px;
+}
+
+@media (max-width: 360px){
+  .summary-grid{ grid-template-columns: 1fr; }
+}
+
+
+
+
+        .hidden {
+            display: none;
+        }
+    </style>
 </head>
 
 <body>
-  <div class="box">
-    <div class="card">
+    <div id="testBadge" class="test-badge">Тестовий режим</div>
+    <div class="box">
+        <div class="card">
 
-      <!-- Верх завжди видимий -->
-      <div class="title">Відомість по нарахованому бонусу</div>
+            <!-- Верх завжди видимий -->
+            <div class="title">Відомості по винагороді за заправку генератора</div>
 
-      <div class="row">
-        <div class="field">
-          <div class="field-label">Рік</div>
-          <select id="yearSel"></select>
+            <div class="row">
+                <div class="field">
+                    <div class="field-label">Рік</div>
+                    <select id="yearSel"></select>
+                </div>
+                <div class="field">
+                    <div class="field-label">Місяць</div>
+                    <select id="monthSel"></select>
+                </div>
+            </div>
+
+            <button id="calcBtn">🧮 Розрахувати</button>
+            <div id="calcSpinner" class="calc-spinner"></div>
+
+            <!-- Результат -->
+            <div id="resultBlock" class="hidden">
+                <div id="summary" class="summary"></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Імʼя</th>
+                                <th>Сума</th>
+                                <th>Заправки</th>
+                                <th>Логін ТГ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="emptyBlock" class="hidden empty">
+                Відсутні дані за <b id="emptyPeriod"></b> по заправці генератора
+            </div>
+
+            <!-- Помилка -->
+            <div id="errorBlock" class="hidden error">
+                <div class="error-title">❌ Помилка</div>
+                <div id="errorText"></div>
+            </div>
+
         </div>
-        <div class="field">
-          <div class="field-label">Місяць</div>
-          <select id="monthSel"></select>
-        </div>
-      </div>
-
-      <button id="calcBtn">🧮 Розрахувати</button>
-      <div id="calcSpinner" class="calc-spinner"></div>
-
-      <!-- Результат -->
-      <div id="resultBlock" class="hidden">
-        <div id="summary" class="summary"></div>
-  <div class="table-wrap">
-  <table>
-          <thead>
-            <tr>
-              <th>Імʼя</th>
-              <th>Сума</th>
-              <th>Логін ТГ</th>
-              <th>Відпрацьовані дні</th>
-            </tr>
-          </thead>
-          <tbody id="tbody"></tbody>
-  </table>
-</div>
-      </div>
-
-      <!-- Помилка -->
-      <div id="errorBlock" class="hidden error">
-        <div class="error-title">❌ Помилка</div>
-      </div>
-
     </div>
-  </div>
 
-<script>
-  const yearSel = document.getElementById("yearSel");
-  const monthSel = document.getElementById("monthSel");
-  const calcBtn = document.getElementById("calcBtn");
-  const spinner = document.getElementById("calcSpinner");
+    <script>
+        const yearSel = document.getElementById("yearSel");
+        const monthSel = document.getElementById("monthSel");
+        const calcBtn = document.getElementById("calcBtn");
+        const spinner = document.getElementById("calcSpinner");
 
 
-  const resultBlock = document.getElementById("resultBlock");
-  const errorBlock = document.getElementById("errorBlock");
-  const summaryEl = document.getElementById("summary");
-  const tbodyEl = document.getElementById("tbody");
+        const errorTextEl = document.getElementById("errorText");
+        const resultBlock = document.getElementById("resultBlock");
+        const errorBlock = document.getElementById("errorBlock");
+        const summaryEl = document.getElementById("summary");
+        const tbodyEl = document.getElementById("tbody");
+        const emptyBlock = document.getElementById("emptyBlock");
+        const emptyPeriodEl = document.getElementById("emptyPeriod");
 
-  const MONTHS = ["січень","лютий","березень","квітень","травень","червень",
-                  "липень","серпень","вересень","жовтень","листопад","грудень"];
+        const MONTHS = ["січень", "лютий", "березень", "квітень", "травень", "червень",
+            "липень", "серпень", "вересень", "жовтень", "листопад", "грудень"];
 
-  // init period
-  (() => {
-    const d = new Date();
-    for(let y=d.getFullYear()-2;y<=d.getFullYear()+1;y++){
-      yearSel.add(new Option(y,y,y===d.getFullYear()));
-    }
-    MONTHS.forEach((m,i)=>monthSel.add(new Option(m,i+1,i===d.getMonth())));
-  })();
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec";
 
-  function fakeHttp(year,month){
-    return new Promise(res=>setTimeout(()=>res({
-      ok:true,
-      total:45012,
-      rows:[
-        {name:"Івановвфівфі іваненко",tg:"t.me/ddd",sum:455,days:["14(Вт)","20(Ср)","25(Ср)","25(Ср)","25(Ср)","25(Ср)","25(Ср)","25(Ср)"]},
-        {name:"Петров",tg:"t.me/ddd1",sum:455,days:["10(Вт)","21(Ср)","30(Ср)"]}
-      ]
-    }),900));
-  }
 
-  function money(v){return v.toLocaleString("uk-UA")+" грн";}
+        const testBadge = document.getElementById("testBadge");
 
-  async function calculate(){
-    calcBtn.disabled=true;
-    spinner.style.display="block";
-    resultBlock.classList.add("hidden");
-    errorBlock.classList.add("hidden");
+        const tg = window.Telegram?.WebApp || null;
+        const startParam = tg?.initDataUnsafe?.start_param
+            ? String(tg.initDataUnsafe.start_param)
+            : "";
 
-    try{
-      const y=+yearSel.value, m=+monthSel.value;
-      const r=await fakeHttp(y,m);
-      summaryEl.innerHTML=`<b>Всього за ${MONTHS[m-1]} ${y} р.</b> <span class="money">${money(r.total)}</span>`;
-      tbodyEl.innerHTML=r.rows.map(x=>`
-        <tr>
-          <td>${x.name}</td>
-            <td class="money">${money(x.sum)}</td>          
-          <td><a href="https://${x.tg}" target="_blank">${x.tg}</a></td>
-          <td>${x.days.join(", ")}</td>
-        </tr>`).join("");
-      resultBlock.classList.remove("hidden");
-    }catch{
-      errorBlock.classList.remove("hidden");
-    }finally{
-      spinner.style.display="none";
-      calcBtn.disabled=false;
-    }
-  }
+        if (startParam.includes("IsTest=Yes")) {
+            testBadge.style.display = "block";
+        }
 
-  calcBtn.onclick=calculate;
-</script>
+        function getKyivNow() {
+            const parts = new Intl.DateTimeFormat("uk-UA", {
+                timeZone: "Europe/Kyiv",
+                year: "numeric",
+                month: "numeric"
+            }).formatToParts(new Date());
+
+            const map = Object.fromEntries(parts.map(p => [p.type, p.value]));
+
+            return {
+                year: Number(map.year),
+                month: Number(map.month) // 1..12
+            };
+        }
+
+        // init period
+        (() => {
+            const { year, month } = getKyivNow(); // 👈 КЛЮЧЕВО
+
+            yearSel.add(new Option(2024, 2024));
+            yearSel.add(new Option(2025, 2025));
+            yearSel.add(new Option(2026, 2026));
+            yearSel.add(new Option(2027, 2027));
+
+            MONTHS.forEach((m, i) =>
+                monthSel.add(new Option(m, i + 1))
+            );
+
+            // 🔑 Важно: выставляем выбор ПОСЛЕ отрисовки
+            for (let i = 0; i < 2; i++) {
+                requestAnimationFrame(() => {
+                    yearSel.value = String(year);
+                    monthSel.value = String(month);
+
+                    // 🔒 Подстраховка через индекс
+                    if (yearSel.value !== String(year)) {
+                        yearSel.selectedIndex = years.indexOf(year);
+                    }
+                    if (monthSel.value !== String(month)) {
+                        monthSel.selectedIndex = month - 1;
+                    }
+                });
+            }
+
+        })();;
+
+
+
+        function renderSummary({ y, m, totalAmount, totalRefuels }) {
+  const period = `${MONTHS[m - 1]} ${y} р.`;
+
+  return `
+    <div class="summary-top">
+      <div class="summary-title">
+        Всього за <span class="summary-period">${period}</span>
+      </div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-item">
+        <div class="summary-label">⛽ Заправок</div>
+        <div class="summary-value">${totalRefuels}</div>
+      </div>
+
+      <div class="summary-item">
+        <div class="summary-label">💰 Винагорода</div>
+        <div class="summary-value">${money(totalAmount)}</div>
+      </div>
+    </div>
+  `;
+}
+
+
+        function money(v) { return v.toLocaleString("uk-UA") + " грн"; }
+
+        async function calculate() {
+            calcBtn.disabled = true;
+            spinner.style.display = "block";
+            resultBlock.classList.add("hidden");
+            emptyBlock.classList.add("hidden");
+            errorBlock.classList.add("hidden");
+
+            const y = +yearSel.value, m = +monthSel.value;
+
+
+
+            const tg = window.Telegram?.WebApp || null;
+
+            const u = tg?.initDataUnsafe?.user;
+            const userName = u
+                ? [u.first_name, u.last_name].filter(Boolean).join(" ")
+                : "";
+
+
+            const params = new URLSearchParams({
+                action: "getBonus",
+                period: y.toString() + "-" + m.toString(),
+                user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+                user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+                platform: tg?.platform || "",
+                user_name: userName,
+                dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
+            });
+
+            const url = GAS_URL + "?" + params.toString();
+
+
+
+
+            try {
+
+
+                const res = await fetch(url, { method: "GET", cache: "no-store" });
+
+                if (!res.ok) {
+                    throw new Error(`HTTP ${res.status}`);
+                }
+
+                const json = await res.json();
+
+                if (!json.ok) {
+                    throw new Error(json.error || "Помилка сервера");
+                }
+
+    
+
+                if (!json.rows || json.rows.length === 0) {
+
+                    // показать сообщение "нет данных"
+                    emptyPeriodEl.textContent = `${MONTHS[m - 1]} ${y} р.`;
+                    emptyBlock.classList.remove("hidden");
+
+                    // скрыть таблицу
+                    tbodyEl.innerHTML = "";
+
+                } else {
+
+
+                    // заполнить таблицу
+                    tbodyEl.innerHTML = json.rows.map(x => `
+                    <tr>
+                        <td>${x.name}</td>
+                        <td class="money">${money(x.sum)}</td>
+                        <td>${x.days.join(", ")}</td>
+                        <td>${x.tg ? `<a href="https://${x.tg}" target="_blank">${x.tg}</a>` : ""}</td>
+                    </tr>
+                     `).join("");
+
+
+                    
+                    summaryEl.innerHTML = renderSummary({
+                    y,
+                    m,
+                    totalAmount: json.totalAmount,
+                    totalRefuels : json.totalRefuels
+                    });
+
+
+                    resultBlock.classList.remove("hidden");
+
+                }
+
+
+            } catch (err) {
+                errorTextEl.textContent =
+                    err?.message
+                        ? err.message
+                        : "Невідома помилка при отриманні даних";
+
+                errorBlock.classList.remove("hidden");
+                console.error(err);
+
+
+            } finally {
+                spinner.style.display = "none";
+                calcBtn.disabled = false;
+            }
+        }
+
+        calcBtn.onclick = calculate;
+    </script>
 </body>
+
 </html>

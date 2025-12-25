@@ -75,6 +75,7 @@
       text-align: center;
     }
 
+    
     .spinner {
       width: 28px;
       height: 28px;
@@ -121,7 +122,7 @@
 
     const loaderEl = document.getElementById("loader");
     const contentEl = document.getElementById("content");
-
+  
 
     const testBadge = document.getElementById("testBadge");
 
@@ -153,14 +154,8 @@
         user_name: userName,
         dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
       });
-      console.log("!!");
+    
       const url = GAS_URL + "?" + params.toString();
-
-
-
-
-
-
 
 
 
