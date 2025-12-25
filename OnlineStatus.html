@@ -97,9 +97,9 @@
 
 <body>
   <!-- Loader -->
-  <div id="testBadge" class="test-badge">Тестовий режим</div>
   <div id="loader" class="loader">
     <div class="loader-inner">
+      <div id="testBadge" class="test-badge">Тестовий режим</div>
       <div class="spinner" aria-hidden="true"></div>
       <div class="loader-text">Виконується завантаження…</div>
     </div>
@@ -128,7 +128,7 @@
       ? String(tg.initDataUnsafe.start_param)
       : "";
 
-    if (startParam.includes("IsTest=Yes") ) {
+    if (startParam.includes("IsTest=Yes")   ) {
       testBadge.style.display = "block";
     }
 
