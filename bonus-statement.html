@@ -135,6 +135,18 @@
       background:rgba(229,57,53,.08);
       border:1px solid rgba(229,57,53,.25);
     }
+
+    .table-wrap{
+  width:100%;
+  overflow-x:auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius:14px;
+}
+/* чтобы таблица нормально считалась внутри скролла */
+.table-wrap table{
+  min-width: 520px; /* можно 480/520/560 — по вкусу */
+}
+
     .error-title{ color:#e53935; font-weight:900; }
   </style>
 </head>
@@ -163,7 +175,8 @@
       <!-- Результат -->
       <div id="resultBlock" class="hidden">
         <div id="summary" class="summary"></div>
-        <table>
+  <div class="table-wrap">
+  <table>
           <thead>
             <tr>
               <th>Імʼя</th>
@@ -173,7 +186,8 @@
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
-        </table>
+  </table>
+</div>
       </div>
 
       <!-- Помилка -->
