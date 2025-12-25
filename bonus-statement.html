@@ -180,8 +180,8 @@
           <thead>
             <tr>
               <th>Імʼя</th>
-              <th>Логін ТГ</th>
               <th>Сума</th>
+              <th>Логін ТГ</th>
               <th>Відпрацьовані дні</th>
             </tr>
           </thead>
@@ -227,7 +227,7 @@
       ok:true,
       total:45012,
       rows:[
-        {name:"Іванов",tg:"t.me/ddd",sum:455,days:["14(Вт)","20(Ср)","25(Ср)","25(Ср)","25(Ср)","25(Ср)","25(Ср)","25(Ср)"]},
+        {name:"Івановвфівфі іваненко",tg:"t.me/ddd",sum:455,days:["14(Вт)","20(Ср)","25(Ср)","25(Ср)","25(Ср)","25(Ср)","25(Ср)","25(Ср)"]},
         {name:"Петров",tg:"t.me/ddd1",sum:455,days:["10(Вт)","21(Ср)","30(Ср)"]}
       ]
     }),900));
@@ -248,8 +248,8 @@
       tbodyEl.innerHTML=r.rows.map(x=>`
         <tr>
           <td>${x.name}</td>
+            <td class="money">${money(x.sum)}</td>          
           <td><a href="https://${x.tg}" target="_blank">${x.tg}</a></td>
-          <td class="money">${money(x.sum)}</td>
           <td>${x.days.join(", ")}</td>
         </tr>`).join("");
       resultBlock.classList.remove("hidden");
