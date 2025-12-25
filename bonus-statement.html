@@ -231,24 +231,28 @@
   border-radius: 14px;
   background: rgba(42,171,238,.08);
   border: 1px solid rgba(42,171,238,.28);
+  text-align:center;            /* центр по горизонтали */
 }
 
 .summary-top{
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  justify-content:center;
   gap:10px;
-  margin-bottom: 10px;
+  margin-bottom: 12px;  /* было 10px — сделай больше */
 }
 
 .summary-title{
   font-size: 16px;
   font-weight: 900;
   line-height: 1.2;
+    text-align:center;            /* центр по горизонтали */
 }
 
 .summary-period{
   font-weight: 800;
+  text-align:center;            /* центр по горизонтали */
+
 }
 
 .summary-total{
@@ -268,6 +272,7 @@
   border: 1px solid rgba(0,0,0,.08);
   border-radius: 12px;
   padding: 10px 10px;
+  text-align:center;            /* центр по горизонтали */
 }
 
 .summary-label{
@@ -275,12 +280,14 @@
   opacity: .75;
   font-weight: 800;
   margin-bottom: 6px;
+  text-align:center;
 }
 
 .summary-value{
   font-size: 18px;
   font-weight: 900;
   line-height: 1.1;
+  text-align:center;            /* на всякий случай */
 }
 
 .summary-value.small{
@@ -306,7 +313,7 @@
         <div class="card">
 
             <!-- Верх завжди видимий -->
-            <div class="title">Відомості по винагороді за заправку генератора</div>
+            <div class="title">Відомість по винагороді за заправку генератора</div>
 
             <div class="row">
                 <div class="field">
@@ -528,7 +535,7 @@
                     <tr>
                         <td>${x.name}</td>
                         <td class="money">${money(x.sum)}</td>
-                        <td>${x.days.join(", ")}</td>
+                        <td>${x.days.join("<br>")}</td>
                         <td>${x.tg ? `<a href="https://${x.tg}" target="_blank">${x.tg}</a>` : ""}</td>
                     </tr>
                      `).join("");
