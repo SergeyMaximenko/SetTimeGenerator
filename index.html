@@ -295,7 +295,8 @@
     function setNowKyivDefaults() {
       const tz = "Europe/Kyiv";
       const d = new Date();
-
+      d.setMinutes(d.getMinutes() - 5);
+      
       const parts = new Intl.DateTimeFormat("en-CA", {
         timeZone: tz,
         year: "numeric",
