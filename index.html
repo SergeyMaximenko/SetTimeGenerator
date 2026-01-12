@@ -133,7 +133,7 @@
     <div class="field-label">Дата заправки</div>
     <input type="date" style="width: 90%;" id="date" />
 
-    <div class="field-label">Час заправки</div>
+    <div class="field-label">Вкажіть час, коли було завершено заправку (а не коли вносяться показники)</div>
     <input type="time" style="width:90%;" id="time" step="60" />
 
     <div class="field-label">Скільки літрів заправлено</div>
@@ -388,7 +388,7 @@
         let json;
         try { json = JSON.parse(text); } catch { json = { ok: false, error: text }; }
 
-        if (!json.ok) {
+        if ( !json.ok) {
           setStatus("❌", (json.error || "Нема доступу"));
           setUiState("blocked");
           return;
@@ -423,7 +423,8 @@
 
       if (!date) { alert("Вкажіть дату"); return; }
       if (!time) { alert("Вкажіть час"); return; }
-      if (elLiters.value >= 200) { alert("Неправильний об'єм "); return; }
+      if (!liters) { alert("Вкажіть скільки літрів заправлено"); return; }
+      if (elLiters.value >= 150) { alert("Неправильний об'єм "); return; }
 
       // ✅ Перевірки часу (за Києвом)
       const nowKyiv = getNowKyiv();
@@ -441,11 +442,20 @@
       }
       console.log("send");
 
+      if (!confirm(`Ви вказали:\n1) 🕒 час завершення заправки (коли шланг був витягнутий з генератора) - ${time}\n2) ⛽ ${elLiters.value} літрів було заправлено\n\nВсі показники вірні? `)) return;
+
+
+
+
+
+
+      /*
       if (!liters) {
         if (!confirm(`Зберегти дані без вказаного об'єму ⛽ заправки?`)) return;
       } else {
         if (!confirm(`Підтверджуєте заправку \n⛽ ${elLiters.value} літрів?`)) return;
       }
+        */
 
       try {
         setUiState("saving");
