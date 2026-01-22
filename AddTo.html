@@ -383,13 +383,19 @@
                 const userName = u
                     ? [u.first_name, u.last_name].filter(Boolean).join(" ")
                     : "";
+
+                const startParam = tg?.initDataUnsafe?.start_param
+                    ? String(tg.initDataUnsafe.start_param)
+                    : "";
+                    
                 const params = new URLSearchParams({
                     action: "checkAccess",
                     user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
                     user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
                     user_name: userName,
                     platform: tg?.platform || "",
-                    dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
+                    dop_param: startParam,
+                    source: istartParam.includes("IsTO=Yes") ? "Доступ до ТО" : "Доступ до актуалізації"
 
                 });
 
