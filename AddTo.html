@@ -2,193 +2,205 @@
 <html lang="uk">
 
 <head>
-  <meta charset="utf-8" />
-  <title>Заправка генератора</title>
+    <meta charset="utf-8" />
+    <title>Заправка генератора</title>
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    body {
-      margin: 0;
-      padding: 16px;
-      font-family: -apple-system, Segoe UI, Roboto, Arial;
-    }
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 16px;
+            font-family: -apple-system, Segoe UI, Roboto, Arial;
+        }
 
-    .test-badge {
-      margin: 0 auto 12px;
-      padding: 6px 12px;
-      border-radius: 12px;
-      background: #e53935;
-      color: #fff;
-      font-weight: 700;
-      font-size: 14px;
-      text-align: center;
-      width: fit-content;
-      display: none;
-      /* приховано за замовчуванням */
-    }
+        .test-badge {
+            margin: 0 auto 12px;
+            padding: 6px 12px;
+            border-radius: 12px;
+            background: #e53935;
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            text-align: center;
+            width: fit-content;
+            display: none;
+            /* приховано за замовчуванням */
+        }
 
-    .box {
-      max-width: 420px;
-      margin: 0 auto;
-    }
+        .box {
+            max-width: 420px;
+            margin: 0 auto;
+        }
 
-    .label {
-      text-align: center;
-      font-size: 24px;
-      font-weight: 600;
-      margin: 10px 0 18px;
-    }
+        .label {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 600;
+            margin: 10px 0 18px;
+        }
 
-    .field-label {
-      font-size: 18px;
-      font-weight: 600;
-      margin-top: 14px;
-      margin-bottom: 6px;
-    }
+        .field-label {
+            font-size: 18px;
+            font-weight: 600;
+            margin-top: 14px;
+            margin-bottom: 6px;
+        }
 
-    .__input-error {
-      border-color: #e53935 !important;
-      /* червона рамка */
-      box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.15);
-    }
+        .__input-error {
+            border-color: #e53935 !important;
+            /* червона рамка */
+            box-shadow: 0 0 0 2px rgba(229, 57, 53, 0.15);
+        }
 
-    input[type="number"],
-    input[type="date"],
-    input[type="time"] {
-      height: 56px;
-      font-size: 28px;
-      border-radius: 14px;
-      border: 2px solid #2aabee;
-      padding: 0 12px;
-      box-sizing: border-box;
-      background: #fff;
-    }
+        input[type="number"],
+        input[type="date"],
+        input[type="time"] {
+            height: 56px;
+            font-size: 28px;
+            border-radius: 14px;
+            border: 2px solid #2aabee;
+            padding: 0 12px;
+            box-sizing: border-box;
+            background: #fff;
+        }
 
-    button {
-      width: 100%;
-      height: 56px;
-      margin-top: 18px;
-      font-size: 28px;
-      font-weight: 700;
-      border: 0;
-      border-radius: 14px;
-      background: #2aabee;
-      color: #fff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      cursor: pointer;
-    }
+        button {
+            width: 100%;
+            height: 56px;
+            margin-top: 18px;
+            font-size: 28px;
+            font-weight: 700;
+            border: 0;
+            border-radius: 14px;
+            background: #2aabee;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+        }
 
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
-    .hint {
-      margin-top: 12px;
-      font-size: 14px;
-      opacity: 0.85;
-      text-align: center;
-      min-height: 20px;
-    }
+        .hint {
+            margin-top: 12px;
+            font-size: 14px;
+            opacity: 0.85;
+            text-align: center;
+            min-height: 20px;
+        }
 
-    /* Простий спіннер */
-    .spinner {
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      border: 3px solid rgba(255, 255, 255, 0.45);
-      border-top-color: #fff;
-      animation: spin 0.8s linear infinite;
-      display: none;
-    }
+        /* Простий спіннер */
+        .spinner {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.45);
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+            display: none;
+        }
 
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
 
-    /* Коли йде збереження */
-    .saving .spinner {
-      display: inline-block;
-    }
+        /* Коли йде збереження */
+        .saving .spinner {
+            display: inline-block;
+        }
 
-    /* Коли йде перевірка доступу */
-    .checking .spinner {
-      display: inline-block;
-    }
-  </style>
+        /* Коли йде перевірка доступу */
+        .checking .spinner {
+            display: inline-block;
+        }
+    </style>
 
 </head>
 
 <body>
-  <div id="testBadge" class="test-badge">Тестовий режим</div>
-  <div class="box">
-    <div class="label">Показники проведення ТО</div>
+    <div id="testBadge" class="test-badge">Тестовий режим</div>
+    <div class="box">
+        <div id="labelMain" class="label">Показники актуалізації мотогодин</div>
 
-    <div class="field-label">Дата ТО</div>
-    <input type="date" style="width: 90%;" id="date" />
+        <div id="labelDate" class="field-label">Дата</div>
+        <input type="date" style="width: 90%;" id="date" />
 
-    <div class="field-label">Вкажіть час, коли було закінчено ТО</div>
-    <input type="time" style="width:90%;" id="time" step="60" />
+        <div id="labelTime" class="field-label">Вкажіть час</div>
+        <input type="time" style="width:90%;" id="time" step="60" />
 
-    <div class="field-label">Скільки мотогодин на генераторі на вказаний час</div>
-    <input type="number" id="moto" style="width:4em;" inputmode="numeric" min="0" max="200" step="1" />
+        <div class="field-label">Скільки мотогодин на генераторі на вказаний час</div>
+        <input type="number" id="moto" style="width:4em;" inputmode="numeric" min="0" max="200" step="1" />
 
-    <button id="btnSave" onclick="send()">
-      <span class="spinner" aria-hidden="true"></span>
-      <span id="btnText">Зберегти</span>
-    </button>
+        <button id="btnSave" onclick="send()">
+            <span class="spinner" aria-hidden="true"></span>
+            <span id="btnText">Зберегти</span>
+        </button>
 
-    <div class="hint" id="status"></div>
-  </div>
+        <div class="hint" id="status"></div>
+    </div>
 
-  <script>
-    // ✅ URL Apps Script
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec";
+    <script>
+        // ✅ URL Apps Script
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec";
 
-    const elDate = document.getElementById("date");
-    const elTime = document.getElementById("time");
-    const elMoto = document.getElementById("moto");
+        const elDate = document.getElementById("date");
+        const elTime = document.getElementById("time");
+        const elMoto = document.getElementById("moto");
 
-    const btn = document.getElementById("btnSave");
-    const btnText = document.getElementById("btnText");
-    const statusEl = document.getElementById("status");
-
-
-    const testBadge = document.getElementById("testBadge");
+        const btn = document.getElementById("btnSave");
+        const btnText = document.getElementById("btnText");
+        const statusEl = document.getElementById("status");
 
 
-
-    const tg = window.Telegram?.WebApp || null;
-    const startParam = tg?.initDataUnsafe?.start_param
-      ? String(tg.initDataUnsafe.start_param)
-      : "";
-
-    if (startParam.includes("IsTest=Yes")) {
-      testBadge.style.display = "block";
-    }
-
-    //function setStatus(text) { statusEl.innerHTML  = text || ""; }
-
-    elMoto.addEventListener("input", () => {
-      let v = elMoto.value.replace(/\D/g, ""); // тільки цифри
-      if (v.length > 3) v = v.slice(0, 3);
-      elMoto.value = v;
-    });
-
-    function setStatus(icon, text) {
-      if (!icon && !text) {
-        statusEl.innerHTML = "";
-        return;
-      }
+        const testBadge = document.getElementById("testBadge");
 
 
-      statusEl.innerHTML = `
+
+
+
+        const tg = window.Telegram?.WebApp || null;
+        const startParam = tg?.initDataUnsafe?.start_param
+            ? String(tg.initDataUnsafe.start_param)
+            : "";
+
+        if (startParam.includes("IsTO=Yes")) {
+            document.getElementById("labelMain").textContent = "Показники проведення ТО";
+            document.getElementById("labelDate").textContent = "Дата ТО";
+            document.getElementById("labelTime").textContent = "Вкажіть час, коли було закінчено ТО";
+
+        }
+
+
+
+
+        if (startParam.includes("IsTest=Yes")) {
+            testBadge.style.display = "block";
+        }
+
+        //function setStatus(text) { statusEl.innerHTML  = text || ""; }
+
+        elMoto.addEventListener("input", () => {
+            let v = elMoto.value.replace(/\D/g, ""); // тільки цифри
+            if (v.length > 3) v = v.slice(0, 3);
+            elMoto.value = v;
+        });
+
+        function setStatus(icon, text) {
+            if (!icon && !text) {
+                statusEl.innerHTML = "";
+                return;
+            }
+
+
+            statusEl.innerHTML = `
         <div style="
           display:flex;
           align-items:center;        /* вертикальне вирівнювання іконки + тексту */
@@ -213,286 +225,303 @@
           ` : ""}
         </div>
       `;
-    }
-
-
-    function setUiState(state) {
-      // state: "checking" | "blocked" | "idle" | "saving" | "saved" | "error"
-      const tg = window.Telegram?.WebApp || null;
-      var userName = tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : "";
-
-      if (state === "checking") {
-        elDate.disabled = false;
-        elMoto.disabled = false;
-        elTime.disabled = false;
-        btn.disabled = true;
-        btn.classList.add("checking");
-        btn.classList.remove("saving");
-        btnText.textContent = "Перевірка…";
-        setStatus("⏳", "Перевіряю доступ…");
-        return;
-      }
-
-      if (state === "blocked") {
-        elDate.disabled = false;
-        elMoto.disabled = false;
-        elTime.disabled = false;
-        btn.disabled = true;
-        btn.classList.remove("checking");
-        btn.classList.remove("saving");
-        btnText.textContent = "Зберегти";
-        // status вже виставляється ззовні (помилка)
-        return;
-      }
-
-      if (state === "saving") {
-        elDate.disabled = true;
-        elMoto.disabled = true;
-        elTime.disabled = true;
-        btn.disabled = true;
-        btn.classList.remove("checking");
-        btn.classList.add("saving");
-        btnText.textContent = "Збереження…";
-        setStatus("⏳", "Йде збереження…");
-        return;
-      }
-
-      if (state === "saved") {
-        elDate.disabled = true;
-        elMoto.disabled = true;
-        elTime.disabled = true;
-        btn.disabled = true;
-        btn.classList.remove("checking");
-        btn.classList.remove("saving");
-        btnText.textContent = "✅ Збережено";
-        setStatus("🤝", userName + ", дякуємо за заправку!"); //
-        return;
-      }
-
-      if (state === "error") {
-        elDate.disabled = false;
-        elMoto.disabled = false;
-        elTime.disabled = false;
-        btn.disabled = false;
-        btn.classList.remove("checking");
-        btn.classList.remove("saving");
-        btnText.textContent = "Зберегти";
-        return;
-      }
-
-      // idle
-      elDate.disabled = false;
-      elMoto.disabled = false;
-      elTime.disabled = false;
-      btn.disabled = false;
-      btn.classList.remove("checking");
-      btn.classList.remove("saving");
-      btnText.textContent = "Зберегти";
-      setStatus("🔑", userName + ", у вас є доступ до внесення показників");
-    }
-
-    // Поточна дата/час по Києву
-    function setNowKyivDefaults() {
-      const tz = "Europe/Kyiv";
-      const d = new Date();
-      d.setMinutes(d.getMinutes() - 5);
-      
-      const parts = new Intl.DateTimeFormat("en-CA", {
-        timeZone: tz,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      }).formatToParts(d);
-
-      const map = {};
-      for (const p of parts) if (p.type !== "literal") map[p.type] = p.value;
-
-      elDate.value = `${map.year}-${map.month}-${map.day}`;
-      elTime.value = `${map.hour}:${map.minute}`;
-    }
-
-    // ✅ "Зараз" у Києві як Date (для перевірок)
-    function getNowKyiv() {
-      const tz = "Europe/Kyiv";
-      const d = new Date();
-
-      const parts = new Intl.DateTimeFormat("en-CA", {
-        timeZone: tz,
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-      }).formatToParts(d);
-
-      const m = {};
-      for (const p of parts) if (p.type !== "literal") m[p.type] = p.value;
-
-      // Создаём Date из "киевских" компонент
-      return new Date(
-        Number(m.year),
-        Number(m.month) - 1,
-        Number(m.day),
-        Number(m.hour),
-        Number(m.minute),
-        Number(m.second)
-      );
-    }
-
-    // ✅ Парсим введённые date+time в Date
-    function parseInputDateTime(dateStr, timeStr) {
-      const [y, mo, d] = (dateStr || "").split("-").map(Number);
-      const [hh, mm] = (timeStr || "").split(":").map(Number);
-
-      if (!y || !mo || !d || Number.isNaN(hh) || Number.isNaN(mm)) return null;
-
-      return new Date(y, mo - 1, d, hh, mm, 0);
-    }
-
-    function markError(el) {
-      if (!el.value) el.classList.add("input-error");
-      else el.classList.remove("input-error");
-    }
-
-    // ✅ 1) Одразу блокуємо форму
-    setUiState("checking");
-
-    // ✅ 2) Запускаємо перевірку доступу (без top-level await)
-    (async function checkAccessOnLoad() {
-      try {
-        const tg = window.Telegram?.WebApp || null;
-
-        const u = tg?.initDataUnsafe?.user;
-        const userName = u
-          ? [u.first_name, u.last_name].filter(Boolean).join(" ")
-          : "";
-        const params = new URLSearchParams({
-          action: "checkAccess",
-          user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
-          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
-          user_name: userName,
-          platform: tg?.platform || "",
-          dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
-
-        });
-
-        const url = GAS_URL + "?" + params.toString();
-
-        const res = await fetch(url, { method: "GET", cache: "no-store" });
-
-        const text = await res.text();
-        let json;
-        try { json = JSON.parse(text); } catch { json = { ok: false, error: text }; }
-
-        if ( !json.ok) {
-          setStatus("❌", (json.error || "Нема доступу"));
-          setUiState("blocked");
-          return;
         }
 
-        // ✅ Доступ є — розблоковуємо форму
-        setUiState("idle");
 
-      } catch (e) {
-        console.error(e);
-        setStatus("❌", "Помилка перевірки доступу");
-        setUiState("blocked");
-      }
-    })();
+        function setUiState(state) {
+            // state: "checking" | "blocked" | "idle" | "saving" | "saved" | "error"
+            const tg = window.Telegram?.WebApp || null;
+            var userName = tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : "";
 
-    // Далі — твоя існуюча логіка
-    setNowKyivDefaults();
+            if (state === "checking") {
+                elDate.disabled = false;
+                elMoto.disabled = false;
+                elTime.disabled = false;
+                btn.disabled = true;
+                btn.classList.add("checking");
+                btn.classList.remove("saving");
+                btnText.textContent = "Перевірка…";
+                setStatus("⏳", "Перевіряю доступ…");
+                return;
+            }
 
-    [elDate, elTime, elMoto].forEach(el => {
-      el.addEventListener("input", () => markError(el));
-    });
-    markError(elDate);
-    markError(elTime);
-    markError(elMoto);
+            if (state === "blocked") {
+                elDate.disabled = false;
+                elMoto.disabled = false;
+                elTime.disabled = false;
+                btn.disabled = true;
+                btn.classList.remove("checking");
+                btn.classList.remove("saving");
+                btnText.textContent = "Зберегти";
+                // status вже виставляється ззовні (помилка)
+                return;
+            }
 
-    async function send() {
-      const tg = window.Telegram?.WebApp || null;
+            if (state === "saving") {
+                elDate.disabled = true;
+                elMoto.disabled = true;
+                elTime.disabled = true;
+                btn.disabled = true;
+                btn.classList.remove("checking");
+                btn.classList.add("saving");
+                btnText.textContent = "Збереження…";
+                setStatus("⏳", "Йде збереження…");
+                return;
+            }
 
-      const date = elDate.value;
-      const time = elTime.value;
-      const moto = elMoto.value;
+            if (state === "saved") {
+                elDate.disabled = true;
+                elMoto.disabled = true;
+                elTime.disabled = true;
+                btn.disabled = true;
+                btn.classList.remove("checking");
+                btn.classList.remove("saving");
+                btnText.textContent = "✅ Збережено";
+                setStatus("🤝", userName + ", дякуємо за заправку!"); //
+                return;
+            }
 
-      if (!date) { alert("Вкажіть дату"); return; }
-      if (!time) { alert("Вкажіть час"); return; }
-      if (!moto) { alert("Вкажіть скільки мотогодин на генераторі"); return; }
-      
-      // ✅ Перевірки часу (за Києвом)
-      const nowKyiv = getNowKyiv();
-      const inputDt = parseInputDateTime(date, time);
+            if (state === "error") {
+                elDate.disabled = false;
+                elMoto.disabled = false;
+                elTime.disabled = false;
+                btn.disabled = false;
+                btn.classList.remove("checking");
+                btn.classList.remove("saving");
+                btnText.textContent = "Зберегти";
+                return;
+            }
 
-      if (!inputDt) {
-        alert("Некоректно вказані дата або час");
-        return;
-      }
-
-      // 1) Не може бути пізніше поточного часу (Київ)
-      if (inputDt.getTime() > nowKyiv.getTime()) {
-        alert("❗ Вказаний час не може бути більшим за поточний ");
-        return;
-      }
-      console.log("send");
-
-      if (!confirm(`Ви вказали:\n1) 🕒 час завершення ТО - ${time}\n2) ⏳ ${elMoto.value} мотогодин на генераторі\n\nВсі показники вірні? `)) return;
-
-
-
-
-
-
-      try {
-        setUiState("saving");
-        const u = tg?.initDataUnsafe?.user;
-        const userName = u
-          ? [u.first_name, u.last_name].filter(Boolean).join(" ")
-          : "";
-
-        const params = new URLSearchParams({
-          action: "saveTO",
-          date_zp: `${date} ${time}`,
-          moto: String(moto),
-          user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
-          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
-          user_name: userName,
-          platform: tg?.platform || "",
-          dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : "",
-          is_to: "+"
-        });
-
-        const url = GAS_URL + "?" + params.toString();
-
-        const res = await fetch(url, { method: "GET" });
-
-        const text = await res.text();
-        let json;
-        try { json = JSON.parse(text); } catch { json = { ok: false, error: text }; }
-
-        if (!json.ok) {
-          setStatus("❌", "Помилка: " + (json.error || "unknown"));
-          setUiState("error");
-          if (tg) tg.HapticFeedback?.notificationOccurred?.("error");
-          return;
+            // idle
+            elDate.disabled = false;
+            elMoto.disabled = false;
+            elTime.disabled = false;
+            btn.disabled = false;
+            btn.classList.remove("checking");
+            btn.classList.remove("saving");
+            btnText.textContent = "Зберегти";
+            setStatus("🔑", userName + ", у вас є доступ до внесення показників");
         }
 
-        setUiState("saved");
-        if (tg) tg.HapticFeedback?.notificationOccurred?.("success");
+        // Поточна дата/час по Києву
+        function setNowKyivDefaults() {
+            const tz = "Europe/Kyiv";
+            const d = new Date();
+            d.setMinutes(d.getMinutes() - 5);
 
-      } catch (err) {
-        setStatus("❌", "Помилка: " + err.message);
-        setUiState("error");
-        if (tg) tg.HapticFeedback?.notificationOccurred?.("error");
-      }
-    }
-  </script>
+            const parts = new Intl.DateTimeFormat("en-CA", {
+                timeZone: tz,
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false
+            }).formatToParts(d);
+
+            const map = {};
+            for (const p of parts) if (p.type !== "literal") map[p.type] = p.value;
+
+            elDate.value = `${map.year}-${map.month}-${map.day}`;
+            elTime.value = `${map.hour}:${map.minute}`;
+        }
+
+        // ✅ "Зараз" у Києві як Date (для перевірок)
+        function getNowKyiv() {
+            const tz = "Europe/Kyiv";
+            const d = new Date();
+
+            const parts = new Intl.DateTimeFormat("en-CA", {
+                timeZone: tz,
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: false
+            }).formatToParts(d);
+
+            const m = {};
+            for (const p of parts) if (p.type !== "literal") m[p.type] = p.value;
+
+            // Создаём Date из "киевских" компонент
+            return new Date(
+                Number(m.year),
+                Number(m.month) - 1,
+                Number(m.day),
+                Number(m.hour),
+                Number(m.minute),
+                Number(m.second)
+            );
+        }
+
+        // ✅ Парсим введённые date+time в Date
+        function parseInputDateTime(dateStr, timeStr) {
+            const [y, mo, d] = (dateStr || "").split("-").map(Number);
+            const [hh, mm] = (timeStr || "").split(":").map(Number);
+
+            if (!y || !mo || !d || Number.isNaN(hh) || Number.isNaN(mm)) return null;
+
+            return new Date(y, mo - 1, d, hh, mm, 0);
+        }
+
+        function markError(el) {
+            if (!el.value) el.classList.add("input-error");
+            else el.classList.remove("input-error");
+        }
+
+        // ✅ 1) Одразу блокуємо форму
+        setUiState("checking");
+
+        // ✅ 2) Запускаємо перевірку доступу (без top-level await)
+        (async function checkAccessOnLoad() {
+            try {
+                const tg = window.Telegram?.WebApp || null;
+
+                const u = tg?.initDataUnsafe?.user;
+                const userName = u
+                    ? [u.first_name, u.last_name].filter(Boolean).join(" ")
+                    : "";
+                const params = new URLSearchParams({
+                    action: "checkAccess",
+                    user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+                    user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+                    user_name: userName,
+                    platform: tg?.platform || "",
+                    dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
+
+                });
+
+                const url = GAS_URL + "?" + params.toString();
+
+                const res = await fetch(url, { method: "GET", cache: "no-store" });
+
+                const text = await res.text();
+                let json;
+                try { json = JSON.parse(text); } catch { json = { ok: false, error: text }; }
+
+                if (!json.ok) {
+                    setStatus("❌", (json.error || "Нема доступу"));
+                    setUiState("blocked");
+                    return;
+                }
+
+                // ✅ Доступ є — розблоковуємо форму
+                setUiState("idle");
+
+            } catch (e) {
+                console.error(e);
+                setStatus("❌", "Помилка перевірки доступу");
+                setUiState("blocked");
+            }
+        })();
+
+        // Далі — твоя існуюча логіка
+        setNowKyivDefaults();
+
+        [elDate, elTime, elMoto].forEach(el => {
+            el.addEventListener("input", () => markError(el));
+        });
+        markError(elDate);
+        markError(elTime);
+        markError(elMoto);
+
+        async function send() {
+            const tg = window.Telegram?.WebApp || null;
+
+
+
+        const startParam = tg?.initDataUnsafe?.start_param
+            ? String(tg.initDataUnsafe.start_param)
+            : "";
+
+
+
+            const date = elDate.value;
+            const time = elTime.value;
+            const moto = elMoto.value;
+
+            if (!date) { alert("Вкажіть дату"); return; }
+            if (!time) { alert("Вкажіть час"); return; }
+            if (!moto) { alert("Вкажіть скільки мотогодин на генераторі"); return; }
+
+            // ✅ Перевірки часу (за Києвом)
+            const nowKyiv = getNowKyiv();
+            const inputDt = parseInputDateTime(date, time);
+
+            if (!inputDt) {
+                alert("Некоректно вказані дата або час");
+                return;
+            }
+
+            // 1) Не може бути пізніше поточного часу (Київ)
+            if (inputDt.getTime() > nowKyiv.getTime()) {
+                alert("❗ Вказаний час не може бути більшим за поточний ");
+                return;
+            }
+            console.log("send");
+
+
+          if (startParam.includes("IsTO=Yes")) 
+          {
+            if (!confirm(`Ви вказали:\n1) 🕒 час завершення ТО - ${time}\n2) ⏳ ${elMoto.value} мотогодин на генераторі\n\nВсі показники вірні? `)) return;
+
+        }
+        else
+        {
+            if (!confirm(`Ви вказали:\n1) 🕒 час - ${time}\n2) ⏳ ${elMoto.value} мотогодин на генераторі\n\nВсі показники вірні? `)) return;
+        }
+
+          
+
+
+
+
+
+            try {
+                setUiState("saving");
+                const u = tg?.initDataUnsafe?.user;
+                const userName = u
+                    ? [u.first_name, u.last_name].filter(Boolean).join(" ")
+                    : "";
+
+                const params = new URLSearchParams({
+                    action: "saveTO",
+                    date_zp: `${date} ${time}`,
+                    moto: String(moto),
+                    user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+                    user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+                    user_name: userName,
+                    platform: tg?.platform || "",
+                    dop_param: startParam
+                });
+
+                const url = GAS_URL + "?" + params.toString();
+
+                const res = await fetch(url, { method: "GET" });
+
+                const text = await res.text();
+                let json;
+                try { json = JSON.parse(text); } catch { json = { ok: false, error: text }; }
+
+                if (!json.ok) {
+                    setStatus("❌", "Помилка: " + (json.error || "unknown"));
+                    setUiState("error");
+                    if (tg) tg.HapticFeedback?.notificationOccurred?.("error");
+                    return;
+                }
+
+                setUiState("saved");
+                if (tg) tg.HapticFeedback?.notificationOccurred?.("success");
+
+            } catch (err) {
+                setStatus("❌", "Помилка: " + err.message);
+                setUiState("error");
+                if (tg) tg.HapticFeedback?.notificationOccurred?.("error");
+            }
+        }
+    </script>
 </body>
 
 </html>
