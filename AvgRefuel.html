@@ -18,6 +18,19 @@
       width:140px; display:block; margin:0 auto; text-align:center;
     }
 
+    .test-badge {
+      margin: 0 auto 12px;
+      padding: 6px 12px;
+      border-radius: 12px;
+      background: #e53935;
+      color: #fff;
+      font-weight: 700;
+      font-size: 14px;
+      text-align: center;
+      width: fit-content;
+      display: none;
+    }
+
     .meta {
       margin-top: 10px;
       font-size: 13px;
@@ -85,6 +98,7 @@
 </head>
 
 <body>
+  <div id="testBadge" class="test-badge">Тестовий режим</div>
   <div class="box">
     <div class="label">Середній показник витрат пального (л/год)</div>
     <div class="field-label">(використовується для прогнозу роботи генератора)</div>
@@ -132,10 +146,24 @@
     const btnText = document.getElementById("btnText");
     const statusEl = document.getElementById("status");
 
+    const testBadge = document.getElementById("testBadge");
+
     const tg = window.Telegram?.WebApp || null;
 
     // прапор доступу (впливає на поле/кнопку)
     let accessOk = false;
+
+    // ✅ прапорці завершення стартових операцій
+    let accessDone = false;
+    let dataDone = false;
+
+    const startParam = tg?.initDataUnsafe?.start_param
+      ? String(tg.initDataUnsafe.start_param)
+      : "";
+
+    if (startParam.includes("IsTest=Yes")) {
+      testBadge.style.display = "block";
+    }
 
     // ===== helpers UI
     function setStatus(icon, text) {
@@ -159,8 +187,8 @@
         btn.disabled = true;
         btn.classList.add("checking");
         btn.classList.remove("saving");
-        btnText.textContent = "Перевірка…";
-        setStatus("⏳", "Перевіряю доступ…");
+        btnText.textContent = "Завантаження…";
+        setStatus("⏳", "Завантажую дані…");
         return;
       }
 
@@ -184,7 +212,6 @@
       }
 
       if (state === "saving") {
-        // ✅ головне: не disabled, а readOnly + blur
         elAvgFuel.blur();
         elAvgFuel.disabled = false;
         elAvgFuel.readOnly = true;
@@ -198,7 +225,6 @@
       }
 
       if (state === "saved") {
-        // залишимо поле закритим (як у твоєму UX), але без disabled можна теж
         elAvgFuel.blur();
         elAvgFuel.disabled = true;
         elAvgFuel.readOnly = true;
@@ -211,7 +237,6 @@
       }
 
       if (state === "error") {
-        // якщо доступ є — поле/кнопка доступні, якщо нема — закриті
         elAvgFuel.disabled = !accessOk;
         elAvgFuel.readOnly = !accessOk;
 
@@ -220,6 +245,31 @@
         btnText.textContent = "Обновити";
         return;
       }
+    }
+
+    // ✅ один контролер стартового спінера:
+    // спінер крутиться, поки НЕ завершились і доступ, і дані
+    function applyStartupUi() {
+      const startupLoading = !(accessDone && dataDone);
+
+      if (startupLoading) {
+        // показуємо спінер як у checking
+        btn.classList.add("checking");
+        btn.classList.remove("saving");
+        btn.disabled = true;
+        btnText.textContent = "Завантаження…";
+        // поле закрите доки не відомо чи є доступ
+        elAvgFuel.disabled = true;
+        elAvgFuel.readOnly = true;
+        // статус не перетираємо жорстко, щоб checkAccess міг показати "нема доступу"
+        if (!statusEl.innerHTML) setStatus("⏳", "Завантажую дані…");
+        return;
+      }
+
+      // старт завершено — тепер вирішуємо по доступу
+      btn.classList.remove("checking");
+      if (accessOk) setUiState("idle");
+      else setUiState("blocked");
     }
 
     // ===== input normalize (7,5 -> 7.5; 1 знак)
@@ -296,7 +346,7 @@
       const when = dtRaw ? formatDateWithWeekday(dtRaw) : "";
 
       elSetByLine.innerHTML = `
-        <div><b>Останній раз показник був встановлений:</b></div>
+        <div><b>Цей показник був встановлений:</b></div>
         <div>👤 ${whoHtml}</div>
         ${when ? `<div>📅 ${escapeHtml(when)}</div>` : ""}
       `;
@@ -359,49 +409,72 @@
     // ✅ Старт: ПАРАЛЕЛЬНО
     // 1) checkAccess
     // 2) getAvgFuel (дані)
+    // ✅ СПІНЕР крутиться, поки не завершаться ОБИДВА
     // =========================
     setUiState("checking");
+    // (додатково) поставимо startup-режим відразу
+    accessDone = false;
+    dataDone = false;
+    applyStartupUi();
 
     async function checkAccess() {
-      const userName = buildUserName(tg);
+      try {
+        const userName = buildUserName(tg);
 
-      const dto = await gasGet({
-        action: "checkAccess",
-        user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
-        user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
-        user_name: userName,
-        platform: tg?.platform || "",
-        dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
-      });
+        const dto = await gasGet({
+          action: "checkAccess",
+          user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+          user_name: userName,
+          platform: tg?.platform || "",
+          dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : "",
+          source: "СЕРЕДНІЙ_РОЗХІД"
+        });
 
-      if (!dto || dto.ok === false) {
+        if (!dto || dto.ok === false) {
+          accessOk = false;
+          setStatus("❌", (dto?.error || "Нема доступу"));
+          return;
+        }
+
+        accessOk = true;
+      } catch (e) {
+        console.error(e);
         accessOk = false;
-        setStatus("❌", (dto?.error || "Нема доступу"));
-        setUiState("blocked");
-        return;
+        setStatus("❌", "Помилка перевірки доступу");
+      } finally {
+        accessDone = true;
+        applyStartupUi(); // ✅ може ще крутити, якщо dataDone=false
       }
-
-      accessOk = true;
-      setUiState("idle");
     }
 
     async function loadAvgFuelData() {
-      const dto = await gasGet({
-        action: "getAvgFuel",
-        dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
-      });
+      try {
+        const dto = await gasGet({
+          action: "getAvgFuel",
+          dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
+        });
 
-      if (!dto || dto.ok === false) {
-        if (!accessOk) setStatus("⚠️", "Не вдалося завантажити дані");
-        console.error("getAvgFuel error:", dto?.error || dto);
-        return;
+        if (!dto || dto.ok === false) {
+          console.error("getAvgFuel error:", dto?.error || dto);
+          // дані не завантажились — не блокуємо доступ, лише інформуємо
+          // (якщо доступу немає, checkAccess вже покаже статус)
+          if (accessOk) setStatus("⚠️", "Не вдалося завантажити початкові дані");
+          return;
+        }
+
+        const f = formatOneDecimal(dto.avg_fuel);
+        if (f) elAvgFuel.value = f;
+
+        renderSetByLine(dto);
+        renderHistory(dto);
+      } catch (e) {
+        console.error(e);
+        if (accessOk) setStatus("⚠️", "Помилка завантаження даних");
+      } finally {
+        dataDone = true;
+        applyStartupUi(); // ✅ спінер зупиниться тільки коли і accessDone, і dataDone
       }
-
-      const f = formatOneDecimal(dto.avg_fuel);
-      if (f) elAvgFuel.value = f;
-
-      renderSetByLine(dto);
-      renderHistory(dto);
     }
 
     Promise.allSettled([checkAccess(), loadAvgFuelData()]).catch(console.error);
@@ -444,7 +517,7 @@
         // показник в полі
         elAvgFuel.value = fixed;
 
-        // ✅ Після save — гарантовано перезавантажуємо dto через getAvgFuel (щоб історія не "зникала")
+        // ✅ Після save — перезавантажуємо dto через getAvgFuel
         const dto2 = await gasGet({
           action: "getAvgFuel",
           dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
