@@ -389,7 +389,7 @@
 
       const avg = cnt > 0 ? (sum / cnt).toFixed(1) : "—";
       calcAvgEl.style.display = "block";
-      calcAvgEl.innerHTML = `Розрахунковий середній фактичний показник: <b>${escapeHtml(avg)}</b> л/год`;
+      calcAvgEl.innerHTML = `Розрахунковий середній фактичний показник:<br><b>${escapeHtml(avg)}</b> л/год`;
     }
 
     function buildUserName(tg) {
