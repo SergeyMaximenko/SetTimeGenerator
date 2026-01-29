@@ -1,0 +1,468 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8" />
+  <title>Середній показник витрат пального</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <style>
+    body { margin:0; padding:16px; font-family:-apple-system, Segoe UI, Roboto, Arial; background:#f6f7f9; }
+    .box { max-width:520px; margin:0 auto; }
+    .label { text-align:center; font-size:24px; font-weight:600; margin:10px 0 6px; }
+    .field-label { font-size:18px; font-weight:600; margin-top:0; margin-bottom:10px; text-align:center; }
+
+    input[type="text"]{
+      height:56px; font-size:28px; border-radius:14px; border:2px solid #2aabee;
+      padding:0 12px; box-sizing:border-box; background:#fff;
+      width:140px; display:block; margin:0 auto; text-align:center;
+    }
+
+    .meta {
+      margin-top: 10px;
+      font-size: 13px;
+      opacity: 0.85;
+      text-align: center;
+      line-height: 1.3;
+      min-height: 18px;
+    }
+    .meta a { color:#2aabee; text-decoration:none; font-weight:600; }
+
+    button{
+      width:100%; height:56px; margin-top:18px; font-size:28px; font-weight:700;
+      border:0; border-radius:14px; background:#2aabee; color:#fff;
+      display:flex; align-items:center; justify-content:center; gap:12px; cursor:pointer;
+    }
+    button:disabled{ opacity:0.6; cursor:not-allowed; }
+
+    .hint{ margin-top:12px; font-size:14px; opacity:0.85; text-align:center; min-height:20px; }
+
+    .spinner{
+      width:22px; height:22px; border-radius:50%;
+      border:3px solid rgba(255,255,255,0.45);
+      border-top-color:#fff;
+      animation:spin .8s linear infinite;
+      display:none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .saving .spinner{ display:inline-block; }
+    .checking .spinner{ display:inline-block; } /* ✅ як у заправці */
+
+    .history-wrap{
+      margin-top: 14px;
+      background:#fff;
+      border: 1px solid rgba(0,0,0,0.06);
+      border-radius: 14px;
+      padding: 12px;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.06);
+    }
+    .history-title{
+      font-size: 16px;
+      font-weight: 700;
+      margin: 0 0 10px;
+      text-align: center;
+    }
+    table{ width:100%; border-collapse: collapse; font-size: 14px; }
+    th, td{ padding: 10px 8px; border-bottom: 1px solid rgba(0,0,0,0.06); text-align: left; }
+    th{ font-weight: 700; opacity: 0.85; font-size: 13px; }
+    td.value{ font-weight: 700; text-align: right; white-space: nowrap; }
+    tr:last-child td{ border-bottom: 0; }
+
+    .empty { text-align:center; font-size:13px; opacity:0.75; padding: 8px 0 2px; }
+
+    .calc {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(0,0,0,0.18);
+      text-align: center;
+      font-size: 14px;
+      opacity: 0.95;
+      line-height: 1.35;
+    }
+    .calc b { font-size: 16px; }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <div class="label">Середній показник витрат пального (л/год)</div>
+    <div class="field-label">(використовується для прогнозу роботи генератора)</div>
+    <input type="text" id="avgFuel" inputmode="decimal" placeholder="0.0" />
+
+    <div class="meta" id="setByLine"></div>
+
+    <div class="history-wrap" id="historyWrap" style="display:none;">
+      <div class="history-title">Останні 6 фактичних розходів (л/год)</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Дата</th>
+            <th style="text-align:right;">Значення</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody"></tbody>
+      </table>
+
+      <div class="calc" id="calcAvg" style="display:none;"></div>
+      <div class="empty" id="historyEmpty" style="display:none;">Немає історії</div>
+    </div>
+
+    <button id="btnSave" onclick="send()">
+      <span class="spinner" aria-hidden="true"></span>
+      <span id="btnText">Обновити</span>
+    </button>
+
+    <div class="hint" id="status"></div>
+  </div>
+
+  <script>
+    // ✅ URL Apps Script
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxrC-JQWWUTJgXmIjk-_MUabT6Cub_f9oVKNouUvRx2u6GYSkelUc0Z69MJcwCa4eBr/exec";
+
+    const elAvgFuel = document.getElementById("avgFuel");
+    const elSetByLine = document.getElementById("setByLine");
+
+    const historyWrap = document.getElementById("historyWrap");
+    const historyBody = document.getElementById("historyBody");
+    const historyEmpty = document.getElementById("historyEmpty");
+    const calcAvgEl = document.getElementById("calcAvg");
+
+    const btn = document.getElementById("btnSave");
+    const btnText = document.getElementById("btnText");
+    const statusEl = document.getElementById("status");
+
+    const tg = window.Telegram?.WebApp || null;
+
+    // ===== helpers UI
+    function setStatus(icon, text) {
+      if (!icon && !text) { statusEl.innerHTML = ""; return; }
+      statusEl.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:center;min-height:48px;gap:10px;text-align:left;">
+          ${icon ? `<div style="font-size:22px;line-height:1;flex-shrink:0;">${icon}</div>` : ""}
+          ${text ? `<div style="font-size:14px;opacity:0.9;line-height:1.25;white-space:pre-line;">${text}</div>` : ""}
+        </div>`;
+    }
+
+function setUiState(state) {
+  // state: "checking" | "blocked" | "idle" | "saving" | "saved" | "error"
+  const userName = tg?.initDataUnsafe?.user?.first_name ? String(tg.initDataUnsafe.user.first_name) : "";
+
+  if (state === "checking") {
+    // ✅ ПОЛЕ ЗАКРИТЕ під час завантаження/перевірки
+    elAvgFuel.disabled = true;
+    btn.disabled = true;
+    btn.classList.add("checking");
+    btn.classList.remove("saving");
+    btnText.textContent = "Перевірка…";
+    setStatus("⏳", "Перевіряю доступ…");
+    return;
+  }
+
+  if (state === "blocked") {
+    // ✅ Нема доступу — поле теж ЗАКРИТЕ
+    elAvgFuel.disabled = true;
+    btn.disabled = true;
+    btn.classList.remove("checking", "saving");
+    btnText.textContent = "Обновити";
+    // статус ставиться зовні (помилка доступу)
+    return;
+  }
+
+  if (state === "idle") {
+    // ✅ Є доступ — відкриваємо поле і кнопку
+    elAvgFuel.disabled = false;
+    btn.disabled = false;
+    btn.classList.remove("checking", "saving");
+    btnText.textContent = "Обновити";
+    setStatus("🔑", userName + ", у вас є доступ до внесення показників");
+    return;
+  }
+
+  if (state === "saving") {
+    // ✅ Під час збереження поле закриваємо
+    elAvgFuel.disabled = true;
+    btn.disabled = true;
+    btn.classList.remove("checking");
+    btn.classList.add("saving");
+    btnText.textContent = "Збереження…";
+    setStatus("⏳", "Йде збереження…");
+    return;
+  }
+
+  if (state === "saved") {
+    // ✅ Після збереження залишаємо закритим (як було в твоєму UX)
+    elAvgFuel.disabled = true;
+    btn.disabled = true;
+    btn.classList.remove("checking", "saving");
+    btnText.textContent = "✅ Збережено";
+    setStatus("🤝", userName + ", дякуємо! Показник збережено.");
+    return;
+  }
+
+  if (state === "error") {
+    // ⚠️ Помилка: якщо доступ є — поле можна лишити відкритим, якщо нема — закрите.
+    // Тому орієнтуємось на accessOk
+    elAvgFuel.disabled = !accessOk;
+    btn.disabled = !accessOk ? true : false;
+    btn.classList.remove("checking", "saving");
+    btnText.textContent = "Обновити";
+    return;
+  }
+}
+
+
+    // ===== input normalize (7,5 -> 7.5; 1 знак)
+    elAvgFuel.addEventListener("input", () => {
+      let v = String(elAvgFuel.value || "");
+      v = v.replace(/,/g, ".");
+      v = v.replace(/[^0-9.]/g, "");
+      const parts = v.split(".");
+      if (parts.length > 2) v = parts[0] + "." + parts.slice(1).join("");
+      if (v.includes(".")) {
+        const [a, b] = v.split(".");
+        v = a.slice(0, 2) + "." + (b || "").slice(0, 1);
+      } else {
+        v = v.slice(0, 2);
+      }
+      elAvgFuel.value = v;
+    });
+
+    function escapeHtml(s) {
+      return String(s ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function formatOneDecimal(x) {
+      const n = Number(String(x).replace(",", "."));
+      if (!Number.isFinite(n)) return "";
+      return n.toFixed(1);
+    }
+
+    const UA_DAYS = ["Нд","Пн","Вт","Ср","Чт","Пт","Сб"];
+    function parseToDate(dateStr) {
+      const s = String(dateStr || "").trim();
+      if (!s) return null;
+      const d = new Date(s.includes("T") ? s : s.replace(" ", "T"));
+      return Number.isFinite(d.getTime()) ? d : null;
+    }
+    function splitDateDay(dateStr) {
+      const d = parseToDate(dateStr);
+      if (!d) return { date:"", day:"" };
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      return { date: `${yyyy}-${mm}-${dd}`, day: UA_DAYS[d.getDay()] };
+    }
+    function formatDateWithWeekday(dateStr) {
+      const d = parseToDate(dateStr);
+      if (!d) return escapeHtml(dateStr || "");
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth()+1).padStart(2,"0");
+      const dd = String(d.getDate()).padStart(2,"0");
+      const hh = String(d.getHours()).padStart(2,"0");
+      const mi = String(d.getMinutes()).padStart(2,"0");
+      return `${yyyy}-${mm}-${dd} ${UA_DAYS[d.getDay()]} ${hh}:${mi}`;
+    }
+
+    function renderSetByLine(dto) {
+      const name = (dto?.last_set_by_name || "Невідомо");
+      const codeRaw = (dto?.last_set_by_code || "");
+      const dtRaw = (dto?.last_set_at || "");
+
+      let whoHtml = escapeHtml(name);
+
+      const code = String(codeRaw || "").trim();
+      if (code) {
+        const clean = code.startsWith("@") ? code.slice(1) : code;
+        const display = "@" + clean;
+        whoHtml = `${escapeHtml(name)} (<a href="https://t.me/${encodeURIComponent(clean)}" target="_blank" rel="noopener">${escapeHtml(display)}</a>)`;
+      }
+
+      const when = dtRaw ? formatDateWithWeekday(dtRaw) : "";
+
+      elSetByLine.innerHTML = `
+        <div><b>Останній раз показник був встановлений:</b></div>
+        <div>👤 ${whoHtml}</div>
+        ${when ? `<div>📅 ${escapeHtml(when)}</div>` : ""}
+      `;
+    }
+
+    function renderHistory(dto) {
+      const items = Array.isArray(dto?.last6) ? dto.last6.slice(0, 6) : [];
+
+      historyBody.innerHTML = "";
+      calcAvgEl.style.display = "none";
+      calcAvgEl.innerHTML = "";
+
+      historyWrap.style.display = "block";
+
+      if (!items.length) {
+        historyEmpty.style.display = "block";
+        return;
+      }
+
+      historyEmpty.style.display = "none";
+
+      items.sort((a, b) => String(b.date ?? "").localeCompare(String(a.date ?? "")));
+
+      let sum = 0, cnt = 0;
+
+      for (const it of items) {
+        const parts = splitDateDay(it.date ?? "");
+        const vNum = Number(String(it.avg ?? it.value ?? it.avgFuel ?? "").replace(",", "."));
+        const v = Number.isFinite(vNum) ? vNum : null;
+
+        if (v !== null) { sum += v; cnt++; }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(parts.date)}</td>
+          <td class="value">${v !== null ? v.toFixed(1) : ""}</td>
+        `;
+        historyBody.appendChild(tr);
+      }
+
+      const avg = cnt > 0 ? (sum / cnt).toFixed(1) : "—";
+      calcAvgEl.style.display = "block";
+      calcAvgEl.innerHTML = `Розрахунковий середній фактичний показник: <b>${escapeHtml(avg)}</b> л/год`;
+    }
+
+    function buildUserName(tg) {
+      const u = tg?.initDataUnsafe?.user;
+      return u ? [u.first_name, u.last_name].filter(Boolean).join(" ") : "";
+    }
+
+    async function gasGet(paramsObj) {
+      const params = new URLSearchParams(paramsObj);
+      const url = GAS_URL + "?" + params.toString();
+      const res = await fetch(url, { method: "GET", cache: "no-store" });
+      const text = await res.text();
+      try { return JSON.parse(text); } catch { return { ok:false, error:text }; }
+    }
+
+    // =========================
+    // ✅ Старт: ПАРАЛЕЛЬНО
+    // 1) checkAccess (як у заправці)
+    // 2) getAvgFuel (дані)
+    // =========================
+
+    // на старті — як у заправці: спочатку "checking"
+    setUiState("checking");
+
+    // прапор доступу (впливає лише на кнопку)
+    let accessOk = false;
+
+    // ✅ 1) Перевірка доступу (ідентична логіка запраці — action=checkAccess)
+    async function checkAccess() {
+      const userName = buildUserName(tg);
+
+      const dto = await gasGet({
+        action: "checkAccess",
+        user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+        user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+        user_name: userName,
+        platform: tg?.platform || "",
+        dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
+      });
+
+      if (!dto || dto.ok === false) {
+        accessOk = false;
+        setStatus("❌", (dto?.error || "Нема доступу"));
+        setUiState("blocked");
+        return;
+      }
+
+      accessOk = true;
+      // ⚠️ НЕ перетираємо статус, якщо дані ще завантажуються — просто переводимо в idle
+      setUiState("idle");
+    }
+
+    // ✅ 2) Отримання даних (окремий запит)
+    async function loadAvgFuelData() {
+      const dto = await gasGet({
+        action: "getAvgFuel",
+        // якщо треба — можеш передавати start_param чи інше,
+        // але для читання доступ не потрібен
+        dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
+      });
+
+      if (!dto || dto.ok === false) {
+        // дані не завантажились — але доступ може бути, тому НЕ блокуємо кнопку тут
+        // просто показуємо помилку в статус, якщо доступу ще не було
+        if (!accessOk) setStatus("⚠️", "Не вдалося завантажити дані");
+        console.error("getAvgFuel error:", dto?.error || dto);
+        return;
+      }
+
+      const f = formatOneDecimal(dto.avg_fuel);
+      if (f) elAvgFuel.value = f;
+
+      renderSetByLine(dto);
+      renderHistory(dto);
+    }
+
+    // ✅ запуск паралельно
+    Promise.allSettled([checkAccess(), loadAvgFuelData()])
+      .catch(e => console.error(e));
+
+    // =========================
+    // ✅ SAVE (оновлення)
+    // =========================
+    async function send() {
+      // додаткова страховка: якщо кнопка якимось чином активна без доступу
+      if (!accessOk) { alert("Немає доступу до оновлення показника"); return; }
+
+      const raw = String(elAvgFuel.value || "");
+      const num = Number(raw.replace(",", "."));
+      if (!Number.isFinite(num)) { alert("Вкажіть коректне значення, наприклад 7.5"); return; }
+
+      const fixed = num.toFixed(1);
+      if (!confirm(`Обновити середній розхід: ${fixed} л/год?`)) return;
+
+      try {
+        setUiState("saving");
+
+        const userName = buildUserName(tg);
+
+        const dto = await gasGet({
+          action: "saveAvgFuel", // ✅ твій save action
+          avg_fuel: fixed,
+          user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+          user_name: userName,
+          platform: tg?.platform || "",
+          dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
+        });
+
+        if (!dto || dto.ok === false) {
+          setStatus("❌", "Помилка: " + (dto?.error || "unknown"));
+          setUiState("error");
+          tg?.HapticFeedback?.notificationOccurred?.("error");
+          return;
+        }
+
+        elAvgFuel.value = fixed;
+
+        // якщо GAS повернув оновлені last_set/last6 — відмалюємо
+        if (dto.last_set_by_name || dto.last_set_at || dto.last6) {
+          renderSetByLine(dto);
+          renderHistory(dto);
+        }
+
+        setUiState("saved");
+        tg?.HapticFeedback?.notificationOccurred?.("success");
+
+      } catch (err) {
+        setStatus("❌", "Помилка: " + (err?.message || err));
+        setUiState("error");
+        tg?.HapticFeedback?.notificationOccurred?.("error");
+      }
+    }
+  </script>
+</body>
+</html>
