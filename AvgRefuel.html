@@ -149,6 +149,11 @@
     const testBadge = document.getElementById("testBadge");
 
     const tg = window.Telegram?.WebApp || null;
+    const u = tg?.initDataUnsafe?.user;
+    const userName = u
+          ? [u.first_name, u.last_name].filter(Boolean).join(" ")
+          : "";
+
 
     // прапор доступу (впливає на поле/кнопку)
     let accessOk = false;
@@ -392,10 +397,6 @@
       calcAvgEl.innerHTML = `Розрахунковий середній фактичний показник:<br><b>${escapeHtml(avg)}</b> л/год`;
     }
 
-    function buildUserName(tg) {
-      const u = tg?.initDataUnsafe?.user;
-      return u ? [u.first_name, u.last_name].filter(Boolean).join(" ") : "";
-    }
 
     async function gasGet(paramsObj) {
       const params = new URLSearchParams(paramsObj);
@@ -419,7 +420,7 @@
 
     async function checkAccess() {
       try {
-        const userName = buildUserName(tg);
+
 
         const dto = await gasGet({
           action: "checkAccess",
@@ -452,6 +453,10 @@
       try {
         const dto = await gasGet({
           action: "getAvgFuel",
+          user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+          user_name: userName,
+          platform: tg?.platform || "",
           dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
         });
 
@@ -495,7 +500,6 @@
       try {
         setUiState("saving");
 
-        const userName = buildUserName(tg);
 
         const dto = await gasGet({
           action: "saveAvgFuel",
@@ -514,6 +518,7 @@
           return;
         }
 
+        /*
         // показник в полі
         elAvgFuel.value = fixed;
 
@@ -534,6 +539,7 @@
           renderSetByLine(dto2);
           renderHistory(dto2);
         }
+        */
 
         setUiState("saved");
         tg?.HapticFeedback?.notificationOccurred?.("success");
