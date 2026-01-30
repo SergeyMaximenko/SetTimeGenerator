@@ -520,7 +520,12 @@
         // ✅ Після save — перезавантажуємо dto через getAvgFuel
         const dto2 = await gasGet({
           action: "getAvgFuel",
+          user_id: tg?.initDataUnsafe?.user?.id ? String(tg.initDataUnsafe.user.id) : "",
+          user_code: tg?.initDataUnsafe?.user?.username ? String(tg.initDataUnsafe.user.username) : "",
+          user_name: userName,
+          platform: tg?.platform || "",
           dop_param: tg?.initDataUnsafe?.start_param ? String(tg.initDataUnsafe.start_param) : ""
+          
         });
 
         if (dto2 && dto2.ok !== false) {
