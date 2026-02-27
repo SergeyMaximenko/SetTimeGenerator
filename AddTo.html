@@ -138,7 +138,7 @@
         <input type="time" style="width:90%;" id="time" step="60" />
 
         <div class="field-label">Скільки мотогодин на генераторі на вказаний час</div>
-        <input type="number" id="moto" style="width:4em;" inputmode="numeric" min="0" max="200" step="1" />
+        <input type="number" id="moto" style="width:4em;" inputmode="numeric" min="0" max="9999" step="1" />
 
         <button id="btnSave" onclick="send()">
             <span class="spinner" aria-hidden="true"></span>
@@ -190,7 +190,7 @@
 
         elMoto.addEventListener("input", () => {
             let v = elMoto.value.replace(/\D/g, ""); // тільки цифри
-            if (v.length > 3) v = v.slice(0, 3);
+          
             elMoto.value = v;
         });
 
